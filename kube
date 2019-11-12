@@ -1,0 +1,73 @@
+#!/bin/bash
+# -----------------
+# functions to help with kubernetes
+# ------------------
+set -e
+# source imports the common.sh that has the variable defaults
+source "$(dirname $0)/common.sh"
+
+# used for circleCI to setup the kube/config to talk to rancher
+# ex: kube $K8_USER $K8_TOKEN
+# arg $1 - user name
+# arg $2 - token
+# arg $3 - server
+# arg $4 - cluster name
+function config {
+  kubectl config set-credentials $1 --token=$2
+  kubectl config set-cluster 9ci-dev --server=https://rancher.9ci.io/k8s/clusters/c-xr5cx
+  kubectl config set-context 9ci-dev --user=$1 --cluster=9ci-dev
+  kubectl config use-context 9ci-dev
+}
+
+# quick and dirty templating. replaces a defined seat of tags and calls kubectl apply
+# used in the other functions here
+# ex: kube.sh apply "src/deploy/app-configmap.tpl.yml"
+# arg $1 - DBMS sql-server or mysql
+function apply {
+  template=$(cat "${1}" | sed -e "s/\${NAME}/$NAME/g" \
+    -e "s~\${DOCKER_REPO}~$DOCKER_REPO~g" \
+    -e "s/\${IMAGE_TAG}/$IMAGE_TAG/g" \
+    -e "s/\${DB_PORT}/$DB_PORT/g" \
+    -e "s/\${ING_URL}/$ING_URL/g" \
+    -e "s/\${DB_SERVICE_NAME}/$DB_SERVICE_NAME/g" \
+    -e "s/\${DB_IMAGE_TAG}/$DB_IMAGE_TAG/g" \
+    -e "s/\${DB_PASSWORD}/$DB_PASSWORD/g" \
+    -e "s/\${PASS_VAR_NAME}/$PASS_VAR_NAME/g" \
+    -e "s/\${APP_NAME}/$APP_NAME/g" \
+    -e "s/\${APP_IMAGE_TAG}/$APP_IMAGE_TAG/g" \
+    )
+  #echo "$template"
+  echo "$template" | kubectl apply -f -
+}
+
+# kube.sh clean
+# deletes the workloads, services etc on rancher. I think in the future we will make it so we can update
+function clean {
+  kubectl delete deployment,svc --selector=db=$MYSQL_SERVICE_NAME
+  kubectl delete deployment,svc --selector=db=$MSSQL_SERVICE_NAME
+}
+
+# deploys both the database workload and the app
+function deploy {
+  init_vars $1
+  apply "src/deploy/db-deploy-$1.tpl.yml"
+  apply "src/deploy/db-service.tpl.yml"
+}
+
+# for CI will run config, clean then deploy
+function ci-deploy {
+  config $1 $2
+  clean
+  deploy
+}
+
+# boiler plate taken from stackoverflow for running function with args
+if declare -f "$1" > /dev/null
+then
+  # call function with arguments verbatim
+  "$@"
+else
+  # Show a helpful error
+  echo "'$1' is not a known function name" >&2
+  exit 1
+fi

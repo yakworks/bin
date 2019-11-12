@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# ---
+# Some common helper functions for our docker builds
+# ---
+
+# docker login
+# arg $1 - docker hub user
+# arg $2 - docker hub password
+function hub-login {
+  echo "$2" | docker login -u "$1" --password-stdin
+}
+
+# removes the docker
+# arg $1 - the docker name
+function remove_docker {
+  if [ "$(docker ps -aq -f name=${1})" ]; then
+    # echo "if this following shows errors 'No such container:' next its fine as its doing a force rm"
+    docker stop ${1} || true && docker rm ${1} || true
+  fi
+}
+
+# -----
+# starts a docker (docker run) if its not already running
+# arg $1 - the name of the docker as in --name=${1}
+# arg $2 - the arguments that would normall passed to a docker run
+function start {
+  if [ ! "$(docker ps -q -f name=${1})" ]; then
+    # just in case it does exist but with status=exited fire a remove
+    remove_docker ${1}
+		docker run --name=${1} ${@:2}
+  fi
+}
+
+# -----
+# meant to be run inside the mysql docker with docker exec
+# example: docker exec mysql-builder ./scripts/dock wait_for_mysql
+function wait-for-mysql {
+  host=${1:-127.0.0.1}
+  while ! mysql -h $host --user=root --password=$MYSQL_ROOT_PASSWORD -e "SELECT 1" >/dev/null 2>&1; do
+    sleep 1
+  done
+}
+
+# -----
+# meant to be run inside the sql-server with docker exec
+# example: docker exec sql-server-builder ./scripts/dock wait_for_sql-server
+function wait-for-sql-server {
+  host=${1:-localhost}
+  #/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P '123Foobar' -Q 'SELECT Name FROM sys.Databases'
+  # sqlcmd -S $host -U SA -P $SA_PASSWORD -Q 'SELECT 1;'
+  # for some reason sqlcmd needs to be fully qualified path for it to work on circleci
+  while ! /opt/mssql-tools/bin/sqlcmd -S $host -U SA -P "$SA_PASSWORD" -Q 'SELECT Name FROM sys.Databases' >/dev/null 2>&1; do
+    sleep 1
+  done
+}
+
+# generic way to run functions based on arg
+if declare -f "$1" > /dev/null
+then
+  # call function with arguments verbatim
+  "$@"
+else
+  # Show a helpful error
+  echo "'$1' is not a known function name" >&2
+  exit 1
+fi
+
