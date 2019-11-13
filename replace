@@ -1,27 +1,14 @@
 #!/bin/bash
 # -----------------
-# functions to help with kubernetes
+# functions to help with replacing env vars in template file
 # ------------------
 set -e
 
-# used for circleCI to setup the kube/config to talk to rancher
-# ex: kube $K8_USER $K8_TOKEN
-# arg $1 - server
-# arg $2 - user name
-# arg $3 - token
-# arg $4 - cluster name, will be context name
-function config {
-  kubectl config set-cluster $4 --server=$1
-  kubectl config set-credentials $2 --token=$3
-  kubectl config set-context $4 --user=$1 --cluster=$4
-  kubectl config use-context $4
-}
-
-# WIP TODO quick and dirty templating. replaces a defined seat of tags and calls kubectl apply
-# used in the other functions here
-# ex: kube apply $SOME_PROCESSED_STRING
-# arg $1 - the yml string to apply
-# arg $2 - the yml template file to source
+# quick and dirty templating. replaces a defined seat of tags in format ${VAR}
+# with env vaiables from the specified source file
+# arg $1 - the file to process
+# arg $2 - the env file to source
+# arg $3+ - the additional vars to pass to the env file
 function apply {
   template=$(cat "${1}" | sed -e "s/\${NAME}/$NAME/g" \
     -e "s~\${DOCKER_REPO}~$DOCKER_REPO~g" \

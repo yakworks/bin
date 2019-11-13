@@ -6,7 +6,7 @@
 # docker login
 # arg $1 - docker hub user
 # arg $2 - docker hub password
-function hub-login {
+function hub_login {
   echo "$2" | docker login -u "$1" --password-stdin
 }
 
@@ -34,7 +34,7 @@ function start {
 # -----
 # meant to be run inside the mysql docker with docker exec
 # example: docker exec mysql-builder ./scripts/dock wait_for_mysql
-function wait-for-mysql {
+function wait_for_mysql {
   host=${1:-127.0.0.1}
   while ! mysql -h $host --user=root --password=$MYSQL_ROOT_PASSWORD -e "SELECT 1" >/dev/null 2>&1; do
     sleep 1
@@ -43,10 +43,10 @@ function wait-for-mysql {
 
 # -----
 # meant to be run inside the sql-server with docker exec
-# example: docker exec sql-server-builder ./scripts/dock wait_for_sql-server
-function wait-for-sql-server {
+# example: docker exec sqlserver-builder ./scripts/dock wait_for_sqlserver
+function wait_for_sqlserver {
   host=${1:-localhost}
-  #/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P '123Foobar' -Q 'SELECT Name FROM sys.Databases'
+  #/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'xxxx' -Q 'SELECT Name FROM sys.Databases'
   # sqlcmd -S $host -U SA -P $SA_PASSWORD -Q 'SELECT 1;'
   # for some reason sqlcmd needs to be fully qualified path for it to work on circleci
   while ! /opt/mssql-tools/bin/sqlcmd -S $host -U SA -P "$SA_PASSWORD" -Q 'SELECT Name FROM sys.Databases' >/dev/null 2>&1; do
@@ -55,12 +55,10 @@ function wait-for-sql-server {
 }
 
 # generic way to run functions based on arg
-if declare -f "$1" > /dev/null
-then
+if declare -f "$1" > /dev/null; then
   # call function with arguments verbatim
   "$@"
 else
-  # Show a helpful error
   echo "'$1' is not a known function name" >&2
   exit 1
 fi

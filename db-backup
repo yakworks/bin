@@ -1,10 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # ------------
 # this is meant to be run from the root project dir inside the docker
 # container running the db as it uses the native tools
 # ------------
 
-# the dbms (mysq or sql-server)
+# the dbms (mysq, sqlserver etc...)
 DBMS=$1
 # the database name
 DB_NAME=$2
@@ -13,7 +13,7 @@ BAK_FILE=$3
 
 set -e
 
-function backup-sql-server {
+function backup_sqlserver {
 
   # remove bak file if it exists, otherwise it just keeps adding to it
   rm -f $BAK_FILE
@@ -30,7 +30,7 @@ function backup-sql-server {
   /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U sa -P $SA_PASSWORD -Q "$RST"
 }
 
-function backup-mysql {
+function backup_mysql {
   echo "CREATE DATABASE ${DB_NAME};" > $BAK_FILE
   echo "USE ${DB_NAME};" >> $BAK_FILE
 
@@ -49,4 +49,4 @@ function backup-mysql {
 }
 
 # call function based on DBMS, arg $2 is the name of the database
-backup-$DBMS $DB_NAME $BAK_FILE
+backup_$DBMS $DB_NAME $BAK_FILE
