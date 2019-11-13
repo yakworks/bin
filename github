@@ -1,0 +1,72 @@
+#!/bin/bash
+# -----------------
+# Github helpers.
+# right now largely for publishign docs to github pages
+# ------------------
+set -e
+ghPagesDir=build/gh-pages
+
+# ---- GitHub Project Variables Setup ----
+# the format : ${SOME_VAR:=foo} means that if SOME_VAR is not already set then set to foo
+: ${GITHUB_OWNER:=9ci}
+
+GITHUB_FULLNAME="$GITHUB_OWNER/$GITHUB_REPO"
+GITHUB_BASE_URL="github.com/$GITHUB_FULLNAME.git"
+GITHUB_URL="https://$GH_BASE_URL"
+# For CI the git user token will be set in env var.
+if [[ $GRGIT_USER ]]; then
+  # add the token
+  GITHUB_URL="https://dummy:${GRGIT_USER}@$GITHUB_BASE_URL"
+fi
+
+: ${GITHUB_BOT_USER:=9cibot}
+: ${GITHUB_BOT_EMAIL:=9cibot@9ci.com}
+
+echo "GITHUB_BOT_USER $GITHUB_BOT_USER"
+echo "GITHUB_BOT_EMAIL $GITHUB_BOT_EMAIL"
+
+# clones gh-pages into the build directory
+function clone_gh_pages {
+  mkdir -p build
+  rm -rf $ghPagesDir
+  git clone $GITHUB_URL build/gh-pages -b gh-pages --single-branch --depth 1
+}
+
+# in build/gh-pages commits and pushes gh pages
+function push_gh_pages {
+  git -C $ghPagesDir add -A .
+  git -C $ghPagesDir commit -a -m "CI Docs published [skip ci]"
+  git -C $ghPagesDir push -q $GITHUB_URL gh-pages
+}
+
+# sets up the 9cibot git user info for commit and push
+function config_bot_user {
+  git config credential.helper 'cache --timeout=120'
+  git config --global user.email "$GITHUB_BOT_EMAIL"
+  git config --global user.name "$GITHUB_BOT_USER"
+}
+
+# initializes a gh-pages branch for the first time
+# run this when setting up a new project's gh-pages
+function init_gh_pages {
+  mkdir -p build
+  cd build
+  rm -rf gh-pages
+  git clone $GITHUB_URL gh-pages
+  cd gh-pages
+  git checkout --orphan gh-pages
+  git rm -rf .
+  echo "github pages site" > README.md
+  push_gh_pages
+}
+
+# --- boiler plate function runner, keep at end of file ------
+# will be true if this is run, false if imported into another script with `source bash.sh`
+if [[ "${#BASH_SOURCE[@]}" -eq 1 ]]; then
+  # if declare works then its a function
+  if declare -f "$1" > /dev/null; then
+    "$@" #call function with arguments verbatim
+  else
+    echo "'$1' is not a known function name" >&2; exit 1
+  fi
+fi

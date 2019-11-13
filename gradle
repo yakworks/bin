@@ -1,0 +1,21 @@
+#!/bin/bash
+# -----------------
+# functions for working with gradle
+# ------------------
+
+function getGradleProp {
+    PROP_KEY=$1
+    PROP_VALUE=`cat gradle.properties | grep "$PROP_KEY" | cut -d'=' -f2`
+    echo $PROP_VALUE
+}
+
+# --- boiler plate function runner, keep at end of file ------
+# will be true if this is run, false if imported into another script with `source bash.sh`
+if [[ "${#BASH_SOURCE[@]}" -eq 1 ]]; then
+  # if declare works then its a function
+  if declare -f "$1" > /dev/null; then
+    "$@" #call function with arguments verbatim
+  else
+    echo "'$1' is not a known function name" >&2; exit 1
+  fi
+fi
