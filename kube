@@ -17,14 +17,24 @@ function config {
   kubectl config use-context $4
 }
 
+# creates namespace if it does not exist
+function createNamespace {
+  if [ ! "$(kubectl get ns | grep $1)" ]; then
+    kubectl create namespace "$1"
+  fi
+}
+
 # runs kubectl apply on the passed in string
 function apply {
   echo "$1" | kubectl apply -f -
 }
 
 # runs kubectl delete deployment,svc,configmap,ingress for the passed in selector
+# arg $1 - the selector ex: "app=foo"
+# arg $2 - the namespace, default if not specified
 function clean {
-  kubectl delete deployment,svc,configmap,ingress --selector="$1"
+  ns=${2:-default}
+  kubectl delete deployment,svc,configmap,ingress --selector="$1" --namespace="$ns"
 }
 
 # --- boiler plate function runner, keep at end of file ------
