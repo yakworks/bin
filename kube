@@ -5,11 +5,11 @@
 set -e
 
 # used for circleCI to setup the kube/config to talk to rancher
-# ex: kube $K8_USER $K8_TOKEN
+# ex: kube $K8_SERVER $K8_USER $K8_TOKEN 9ci-dev
 # arg $1 - server
 # arg $2 - user name
 # arg $3 - token
-# arg $4 - cluster name, will be context name
+# arg $4 - cluster name, will also be context name.
 function config {
   kubectl config set-cluster $4 --server=$1
   kubectl config set-credentials $2 --token=$3
@@ -17,55 +17,23 @@ function config {
   kubectl config use-context $4
 }
 
-# WIP TODO quick and dirty templating. replaces a defined seat of tags and calls kubectl apply
-# used in the other functions here
-# ex: kube apply $SOME_PROCESSED_STRING
-# arg $1 - the yml string to apply
-# arg $2 - the yml template file to source
+# runs kubectl apply on the passed in string
 function apply {
-  template=$(cat "${1}" | sed -e "s/\${NAME}/$NAME/g" \
-    -e "s~\${DOCKER_REPO}~$DOCKER_REPO~g" \
-    -e "s/\${IMAGE_TAG}/$IMAGE_TAG/g" \
-    -e "s/\${DB_PORT}/$DB_PORT/g" \
-    -e "s/\${ING_URL}/$ING_URL/g" \
-    -e "s/\${DB_SERVICE_NAME}/$DB_SERVICE_NAME/g" \
-    -e "s/\${DB_IMAGE_TAG}/$DB_IMAGE_TAG/g" \
-    -e "s/\${DB_PASSWORD}/$DB_PASSWORD/g" \
-    -e "s/\${PASS_VAR_NAME}/$PASS_VAR_NAME/g" \
-    -e "s/\${APP_NAME}/$APP_NAME/g" \
-    -e "s/\${APP_IMAGE_TAG}/$APP_IMAGE_TAG/g" \
-    )
-  #echo "$template"
-  echo "$template" | kubectl apply -f -
+  echo "$1" | kubectl apply -f -
 }
 
-# kube.sh clean
-# deletes the workloads, services etc on rancher. I think in the future we will make it so we can update
+# runs kubectl delete deployment,svc,configmap,ingress for the passed in selector
 function clean {
-  kubectl delete deployment,svc --selector=db=$MYSQL_SERVICE_NAME
-  kubectl delete deployment,svc --selector=db=$MSSQL_SERVICE_NAME
+  kubectl delete deployment,svc,configmap,ingress --selector="$1"
 }
 
-# deploys both the database workload and the app
-function deploy {
-  init_vars $1
-  apply "src/deploy/db-deploy-$1.tpl.yml"
-  apply "src/deploy/db-service.tpl.yml"
-}
-
-# for CI will run config, clean then deploy
-function ci-deploy {
-  config $1 $2
-  clean
-  deploy
-}
-
-# boiler plate taken from stackoverflow for running function with args
-if declare -f "$1" > /dev/null; then
-  # call function with arguments verbatim
-  "$@"
-else
-  # Show a helpful error
-  echo "'$1' is not a known function name" >&2
-  exit 1
+# --- boiler plate function runner, keep at end of file ------
+# will be true if this is run, false if imported into another script with `source bash.sh`
+if [[ "${#BASH_SOURCE[@]}" -eq 1 ]]; then
+  # if declare works then its a function
+  if declare -f "$1" > /dev/null; then
+    "$@" #call function with arguments verbatim
+  else
+    echo "'$1' is not a known function name" >&2; exit 1
+  fi
 fi
