@@ -31,6 +31,46 @@ function start {
   fi
 }
 
+# -----------------------------------
+# starts a builder docker with a volume maps to gradle-docker and /project to the local dir
+# arg $1 - name of the docker
+# arg $2 - the docker url, defaults to yakworks/alpine-java:jdk8-builder
+function builder_start {
+  durl=${2:-"yakworks/alpine-java:jdk8-builder"}
+  start $1 -it \
+	  -v `pwd`:/project -w /project \
+		-v ~/.gradle-docker/:/root/.gradle/ \
+		--network builder-net \
+		-d $2
+}
+
+# -----------------------------------
+# create a docker network if it does not exist
+# arg $1 - network name
+function network_create {
+  if [ ! "$(docker network ls | grep $1)" ]; then \
+	  docker network create $1; \
+	fi
+}
+
+# -----------------------------------
+# starts a db docker with a volume maps for current dir (`pwd`) to /project
+# arg $1 - name of the docker
+# arg $2 - the docker url in format repo:image_tag
+# arg $3 - the db_port mapping in form 3306:3306 (1433 for sql server etc)
+# arg $4+ - 4th and beyond are env variables. use for for default password (MYSQL_ROOT_PASSWORD, SA_PASSWORD)
+# example: dock db_start mysql-ndb mysql:5.7 13306:3306 MYSQL_ROOT_PASSWORD=123Foo
+function db_start {
+  # ACCEPT_EULA is for sql server, just an env var so won't matter that its set for others
+  start $1 \
+    --network builder-net \
+    -v `pwd`:/project -w /project \
+    -e ACCEPT_EULA=Y \
+    -p $3  \
+    -e $4 \
+    -d $2
+}
+
 # -----
 # meant to be run inside the mysql docker with docker exec
 # example: docker exec mysql-builder ./scripts/dock wait_for_mysql

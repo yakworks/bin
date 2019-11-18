@@ -1,0 +1,16 @@
+# --- docker builder ---
+.PHONY: builder-start builder-shell builder-remove
+
+# putting @ in front of command hides it from being echoed by make
+# bash ifs have to be one line, as a reminder \ continues the line and need to end each command with a ;
+builder-start: builder-network ## start the docker jdk-builder if its not started yet, unless USE_DOCK_BUILDER=false
+	@${dock.sh} ${DOCK_BUILDER_NAME} ${DOCK_BUILDER_URL}
+
+builder-network: ## run `docker network create builder` to make sure network there to connect dockers
+	@${dock.sh} network_create "builder-net"
+
+builder-shell: builder-start ## opens up a shell into the jdk-builder docker
+	$(DockerExec) bash -l
+
+builder-remove: init ## stops and removes the jdk-builder docker
+	${dock.sh} remove_docker ${DOCK_BUILDER}

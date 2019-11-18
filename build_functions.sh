@@ -27,20 +27,6 @@ function setVersion {
   setVar VERX_NO_DOTS "v${VERSIONX//./-}"
 }
 
-function setupDockBuilderVars {
-  # **** Docker Builder Defaults *****
-  setVar DOCK_BUILDER jdk8-builder
-  setVar DOCK_BUILDER_REPO yakworks/alpine-java
-
-  # if /.dockerenv this is inside a docker already and we don't need to run builders
-  # if its in a docker then we are probably running inside circle CI
-  if [ ! -f /.dockerenv ]; then
-    : ${USE_DOCK_BUILDER:=true}
-    : ${USE_DOCK_DB_BUILDER:=true}
-    BUILD_VARS+="USE_DOCK_BUILDER USE_DOCK_DB_BUILDER "
-  fi
-}
-
 # create env file from BUILD_VARS for importing into makefile.
 # arg $1 - the file to use
 function createEnvFile {
@@ -49,7 +35,7 @@ function createEnvFile {
       val=${!varName}
       echo "$varName=$val" >> $1
   done
-  echo "created $1 file"
+  echo "created $1"
 }
 
 # just spins through the BUILD_VARS and creates a sed replace in the form
