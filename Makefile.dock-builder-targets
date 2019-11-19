@@ -13,4 +13,4 @@ builder-shell: builder-start ## opens up a shell into the jdk-builder docker
 	$(DockerExec) bash -l
 
 builder-remove: init ## stops and removes the jdk-builder docker
-	${dock.sh} remove_docker ${DOCK_BUILDER}
+	${dock.sh} remove_docker ${DOCK_BUILDER_NAME}
