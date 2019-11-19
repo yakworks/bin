@@ -46,6 +46,19 @@ function buildSedArgs {
   done
 }
 
+# runs sed on the kubernetes tpl.yml template files to update and replace variables with values
+# arg $1 the tpl.yml file
+# arg $2 the dir for sed to put the processed file
+# echos out the processed tpl build file location
+function sedTplYml {
+  buildSedArgs
+  mkdir -p "$2"
+  local tplFile=${1##*/}
+  local processedTpl="$2/${tplFile/.tpl.yml/.yml}"
+  sed "$BUILD_VARS_SED_ARGS" "$1" > "$processedTpl"
+	echo "$processedTpl"
+}
+
 # helper/debug function ex: `build.sh logVars test sqlserver`
 function logVars {
   buildEnv "$@"
