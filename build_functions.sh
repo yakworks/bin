@@ -27,6 +27,58 @@ function setVersion {
   setVar VERX_NO_DOTS "v${VERSIONX//./-}"
 }
 
+# sets up defaults vars for docker ninedb and dock builders
+function setupDockerBuilder {
+  # *** the primary Dockerhub repo we will be publishing to ***
+  setVar DOCK_BUILDER_URL "yakworks/alpine-java:jdk8-builder"
+
+  # Do default builders to true if not already set
+  : ${USE_DOCK_BUILDER:=true}
+  : ${USE_DOCK_DB_BUILDER:=true}
+  # if /.dockerenv this is inside a docker (such as circleCI) already
+  # then we don't want to run docker in dockers, so force to false
+  if [ -f /.dockerenv ] || [ "$CI" == "true" ]; then
+    USE_DOCK_BUILDER=false
+    USE_DOCK_DB_BUILDER=false
+  fi
+  BUILD_VARS+="USE_DOCK_BUILDER USE_DOCK_DB_BUILDER "
+
+  if [ "$USE_DOCK_BUILDER" = "true" ]; then
+    setVar DockerExec "docker exec -it ${DOCK_BUILDER_NAME}"
+  fi
+}
+
+# setups the env specific variables
+# arg $1 - the database dbms (mysql,sqlserver,etc)
+function setDbEnv {
+  # arg $1 must always be the database, defaults to mysql if nothing specified
+  setVar DBMS ${1:-mysql}
+  setVar DOCK_DB_BUILD_NAME "$DBMS-build"
+  setVar DOCKER_NINEDB_REPO "dock9/nine-db"
+  setVar DB_IMAGE_TAG "${DBMS}-${VERSIONX}"
+  setVar DOCKER_NINEDB_URL "$DOCKER_NINEDB_REPO:$DB_IMAGE_TAG"
+  setVar DOCKER_DB_URL "$DOCKER_NINEDB_URL"
+
+  # **** DB Vars (MYSQL by default) ****
+  setVar DB_HOST 127.0.0.1
+  setVar DB_PORT 3306
+  # PASS_VAR_NAME is the environment variable name that the docker dbs require. will be different based on vendor
+  setVar PASS_VAR_NAME "MYSQL_ROOT_PASSWORD"
+
+  # DBMS overrides for sqlserver (Oracle in future)
+  if [ "$DBMS" == "sqlserver" ]; then
+    PASS_VAR_NAME="SA_PASSWORD"
+    DB_PORT=1433
+  fi
+  if [ "$USE_DOCK_DB_BUILDER" = "true" ]; then
+    setVar DockerDbExec "docker exec ${DOCK_DB_BUILD_NAME}"
+  fi
+  # if we are inside the docker builder but not in circleCI force the DB_HOST
+  if [ -f /.dockerenv ] && [ "$CI" != "true" ]; then
+    setVar DB_HOST "${DOCK_DB_BUILD_NAME}"
+  fi
+}
+
 # create env file from BUILD_VARS for importing into makefile.
 # arg $1 - the file to use
 function createEnvFile {
@@ -59,10 +111,11 @@ function sedTplYml {
 	echo "$processedTpl"
 }
 
-# helper/debug function ex: `build.sh logVars test sqlserver`
-function logVars {
-  buildEnv "$@"
-  for varName in $BUILD_VARS; do
-      echo "$varName = ${!varName}"
-  done
+# set build environment
+# arg $1 - BUILD_ENV (test, dev, seed)
+# arg $2 - BUILD_ENV (test, dev, seed)
+function setBuildEnv {
+  setVar BUILD_ENV ${1:-test}
+  setVar DB_NAME rcm_9ci_${BUILD_ENV}
+  # [ ! -z "$2" ] && dbEnv "$2"
 }
