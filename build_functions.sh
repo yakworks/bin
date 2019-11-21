@@ -44,8 +44,9 @@ function setupDockerBuilder {
   BUILD_VARS+="USE_DOCK_BUILDER USE_DOCK_DB_BUILDER "
 
   if [ "$USE_DOCK_BUILDER" = "true" ]; then
-    setVar DockerExec "docker exec -it ${DOCK_BUILDER_NAME}"
+    setVar DockerExec "docker exec ${DOCK_BUILDER_NAME}"
   fi
+  setVar DockerShellExec "docker exec -it ${DOCK_BUILDER_NAME}"
 }
 
 # setups the env specific variables
@@ -74,7 +75,7 @@ function setDbEnv {
     setVar DockerDbExec "docker exec ${DOCK_DB_BUILD_NAME}"
   fi
   # if we are inside the docker builder but not in circleCI force the DB_HOST
-  if [ -f /.dockerenv ] && [ "$CI" != "true" ]; then
+  if [ "$USE_DOCK_BUILDER" = "true" ] || [ -f /.dockerenv ] && [ "$CI" != "true" ]; then
     setVar DB_HOST "${DOCK_DB_BUILD_NAME}"
   fi
 }
