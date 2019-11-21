@@ -73,23 +73,28 @@ function db_start {
 
 # -----
 # meant to be run inside the mysql docker with docker exec
+# $1 - host
+# $2 - root password
 # example: docker exec mysql-builder ./scripts/dock wait_for_mysql
 function wait_for_mysql {
   host=${1:-127.0.0.1}
-  while ! mysql -h $host --user=root --password=$MYSQL_ROOT_PASSWORD -e "SELECT 1" >/dev/null 2>&1; do
+  echo "wait for mysql ..."
+  while ! mysql -h $host --user=root --password=$2 -e "SELECT 1" >/dev/null 2>&1; do
     sleep 1
   done
 }
 
 # -----
 # meant to be run inside the sql-server with docker exec
+# $1 - host
+# $2 - sa password
 # example: docker exec sqlserver-builder ./scripts/dock wait_for_sqlserver
 function wait_for_sqlserver {
   host=${1:-localhost}
   #/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'xxxx' -Q 'SELECT Name FROM sys.Databases'
   # sqlcmd -S $host -U SA -P $SA_PASSWORD -Q 'SELECT 1;'
   # for some reason sqlcmd needs to be fully qualified path for it to work on circleci
-  while ! /opt/mssql-tools/bin/sqlcmd -S $host -U SA -P "$SA_PASSWORD" -Q 'SELECT Name FROM sys.Databases' >/dev/null 2>&1; do
+  while ! /opt/mssql-tools/bin/sqlcmd -S $host -U SA -P "$2" -Q 'SELECT Name FROM sys.Databases' >/dev/null 2>&1; do
     sleep 1
   done
 }
