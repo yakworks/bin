@@ -88,6 +88,7 @@ function createEnvFile {
       val=${!varName}
       echo "$varName=$val" >> $1
   done
+  echo "BUILD_VARS=$BUILD_VARS" >> $1
   echo "created $1"
 }
 
@@ -106,7 +107,9 @@ function buildSedArgs {
 function sedTplYml {
   buildSedArgs
   mkdir -p "$2"
+  # parse just the file name
   local tplFile=${1##*/}
+  # replace .tpl.yml with .yml
   local processedTpl="$2/${tplFile/.tpl.yml/.yml}"
   sed "$BUILD_VARS_SED_ARGS" "$1" > "$processedTpl"
 	echo "$processedTpl"

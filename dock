@@ -33,11 +33,13 @@ function start {
 
 # -----------------------------------
 # starts a builder docker with a volume maps to gradle-docker and /project to the local dir
+# maps port 8080 in case running tomcat server
 # arg $1 - name of the docker
 # arg $2 - the docker url, defaults to yakworks/alpine-java:jdk8-builder
 function builder_start {
   durl=${2:-"yakworks/alpine-java:jdk8-builder"}
   start $1 -it \
+    -p 8080:8080 \
 	  -v `pwd`:/project -w /project \
 		-v ~/.gradle-docker/:/root/.gradle/ \
 		--network builder-net \
