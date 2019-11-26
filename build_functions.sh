@@ -23,6 +23,7 @@ function setVersion {
   # ${version%.*} returns the version from source version.properties without last dot so we can add the .x
   # will turn 10.0.2 into 10.0.x
   setVar VERSIONX "${VERSION%.*}.x"
+  setVar NINEDB_VERSION "$VERSIONX"
   #replace dots with - so 10.0.x turns into v10-0-x. kubernetes can't have dots in names
   setVar VERX_NO_DOTS "v${VERSIONX//./-}"
 }
@@ -56,7 +57,7 @@ function setDbEnv {
   setVar DBMS ${1:-mysql}
   setVar DOCK_DB_BUILD_NAME "$DBMS-build"
   setVar DOCKER_NINEDB_REPO "dock9/nine-db"
-  setVar DB_IMAGE_TAG "${DBMS}-${VERSIONX}"
+  setVar DB_IMAGE_TAG "${DBMS}-${NINEDB_VERSION}"
   setVar DOCKER_NINEDB_URL "$DOCKER_NINEDB_REPO:$DB_IMAGE_TAG"
   setVar DOCKER_DB_URL "$DOCKER_NINEDB_URL"
 
