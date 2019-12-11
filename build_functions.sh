@@ -22,7 +22,8 @@ function setVersion {
   setVar VERSION "$1"
   # ${version%.*} returns the version from source version.properties without last dot so we can add the .x
   # will turn 10.0.2 into 10.0.x
-  setVar VERSIONX "${VERSION%.*}.x"
+  major_and_minor=$(echo $VERSION | cut -d. -f1,2)
+  setVar VERSIONX "$major_and_minor.x"
   setVar NINEDB_VERSION "$VERSIONX"
   #replace dots with - so 10.0.x turns into v10-0-x. kubernetes can't have dots in names
   setVar VERX_NO_DOTS "v${VERSIONX//./-}"
