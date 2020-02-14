@@ -1,7 +1,12 @@
 # bin
 common scripts, templates and helpers for building and develpment
 
-# 12 factor app
+## Lost art of the makefile
+
+- https://www.olioapps.com/blog/the-lost-art-of-the-makefile/
+- https://3musketeers.io/
+
+## 12 factor app is the philosophy
 - https://12factor.net
 
 # Refs
