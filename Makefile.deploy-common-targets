@@ -7,7 +7,7 @@ dockerhub-login: ## login to docker hub using whats in the env vars $DOCKERHUB_U
 
 # ----- kubernetes ------
 kube-config: ## creates kubectl config assumes $K8_USER $K8_TOKEN env vars are setup
-	$(kube.sh) config ${KUB_SERVER} $$K8_USER $$K8_TOKEN 9ci-dev
+	$(kube.sh) config ${KUB_SERVER} $$K8_USER $$K8_TOKEN ranch-dev
 
 kube-create-ns: # creates the KUB_NAMESPACE namespace if its doesn't exist
 	@$(kube.sh) createNamespace ${KUB_NAMESPACE}
