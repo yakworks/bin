@@ -125,3 +125,18 @@ function setBuildEnv {
   setVar DB_NAME rcm_9ci_${BUILD_ENV}
   # [ ! -z "$2" ] && dbEnv "$2"
 }
+
+
+function incrementVersion {
+  echo $(build/bin/semver bump $@)
+}
+
+function updateVersion {
+if [ -n "$1" ] ; then
+    sed -i.x -e "s/^version=.*/version=$1/g" version.properties
+    rm -f version.properties.x
+  else
+    echo "ERROR: missing version parameter " >&2
+    return 1
+  fi
+}
