@@ -126,17 +126,18 @@ function setBuildEnv {
   # [ ! -z "$2" ] && dbEnv "$2"
 }
 
-
+#Increments the given version and returns it
 function incrementVersion {
   echo $(build/bin/semver bump $@)
 }
 
+#Updates version.properties with given version
 function updateVersion {
 if [ -n "$1" ] ; then
-    sed -i.x -e "s/^version=.*/version=$1/g" version.properties
-    rm -f version.properties.x
-  else
-    echo "ERROR: missing version parameter " >&2
-    return 1
-  fi
+		sed -i.x -e "s/^version=.*/version=$1/g" version.properties
+		rm -f version.properties.x
+	else
+		echo "ERROR: missing version parameter " >&2
+		return 1
+	fi
 }
