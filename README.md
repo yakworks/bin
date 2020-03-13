@@ -37,7 +37,13 @@ Makefile.deploy-common-targets must have been included in the main make file
 - ``make version`` will print the version which will be released.
 - ``make update-version`` will update version.properties with new version
 - ``make git-tag`` Tags the current version and pushes to github
-- ```make release``` will update version, build docker image, push the image to docker hub and tag to github
+- ``make release`` will update version, build docker image, push the image to docker hub and tag to github
+
+**How to use semantic version and release support in another projects**
+- The project must have a version.properties file with proper semantic version
+- within build.sh of the project, source build_functions.sh and use updateVersion/incrementVersion as explained above to manipulate versions as required
+- Within main make file of the project, include ``Makefile.deploy-common-targets``. The above mentioned common targets will be available to the project.
+
 
 # Refs
 
