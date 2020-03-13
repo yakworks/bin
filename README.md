@@ -9,7 +9,7 @@ common scripts, templates and helpers for building and develpment
 ## 12 factor app is the philosophy
 - https://12factor.net
 
-##Semantic versioning support
+## Semantic versioning support
 ```semver.sh ``` which is based on [this](https://github.com/fsaintjacques/semver-tool) tool provides utility
 to manipulate semantic version strings from bash scripts.
 
