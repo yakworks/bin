@@ -31,6 +31,7 @@ semver bump major 10.0.0 > 11.0.0
 - update version.properties with given version. ```updateVersion(10.0.0-RC.1)```
 
 **Make file helpers**
+
 Makefile.deploy-common-targets must have been included in the main make file
 
 - ``make version`` will print the version which will be released.
