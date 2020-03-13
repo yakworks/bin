@@ -26,6 +26,8 @@ semver bump minor 10.0.0 > 10.1.0
 semver bump major 10.0.0 > 11.0.0
 ```
 
+Note: bump pre-release will work only if the version has pre release part, major.minor.patch-PRE.x (PRE could be any thing, eg RC.1)
+
 **```build_functions.sh```** helpers
 - provides a helper method to bump version using eg. ```incrementVersion(patch 10.0.0)```
 - update version.properties with given version. ```updateVersion(10.0.0-RC.1)```
