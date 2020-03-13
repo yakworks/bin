@@ -22,9 +22,9 @@ PROG_VERSION="3.0.0"
 
 USAGE="\
 Usage:
-  $PROG bump (major|minor|patch|release|prerel <prerel>|build <build>) <version>
+  $PROG bump (major|minor|patch|release|pre-release) <version>
   $PROG compare <version> <other_version>
-  $PROG get (major|minor|patch|release|prerel|build) <version>
+  $PROG get (major|minor|patch|release|pre-release|build) <version>
   $PROG --help
   $PROG --version
 
@@ -206,7 +206,7 @@ function command-bump {
 
   case $1 in
     major|minor|patch|release) command=$1; version=$2;;
-    prerel|build) command=$1; sub_version=$2 version=$2 ;;
+    pre-release|build) command=$1; sub_version=$2 version=$2 ;;
     *) usage-help;;
   esac
 
@@ -230,7 +230,7 @@ function command-bump {
     minor) new="${major}.$((minor + 1)).0";;
     patch) new="${major}.${minor}.$((patch + 1))";;
     release) new="${major}.${minor}.${patch}";;
-    prerel) new=$(validate-version "${major}.${minor}.${patch}${sub_version}");;
+    pre-release) new=$(validate-version "${major}.${minor}.${patch}${sub_version}");;
     build) new=$(validate-version "${major}.${minor}.${patch}${prere}+${sub_version}");;
     *) usage-help ;;
   esac
@@ -274,7 +274,7 @@ function command-get {
     local release="${major}.${minor}.${patch}"
 
     case "$part" in
-        major|minor|patch|release|prerel|build) echo "${!part}" ;;
+        major|minor|patch|release|pre-release|build) echo "${!part}" ;;
         *) usage-help ;;
     esac
 

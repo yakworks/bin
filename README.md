@@ -9,6 +9,35 @@ common scripts, templates and helpers for building and develpment
 ## 12 factor app is the philosophy
 - https://12factor.net
 
+##Semantic versioning support
+```semver.sh ``` which is based on [this](https://github.com/fsaintjacques/semver-tool) tool provides utility
+to manipulate semantic version strings from bash scripts.
+
+syntax : ```semver bump (major|minor|patch|pre-release) <version>```
+
+Note: Version must be properly formatted as a semantic version string
+
+**Examples**: 
+
+```bash
+semver bump pre-release 10.0.0-RC.1 > 10.0.0-RC.2
+semver bump patch 10.0.0 > 10.0.1
+semver bump minor 10.0.0 > 10.1.0
+semver bump major 10.0.0 > 11.0.0
+```
+
+**```build_functions.sh```** helpers
+- provides a helper method to bump version using eg. ```incrementVersion(patch 10.0.0)```
+- update version.properties with given version. ```updateVersion(10.0.0-RC.1)```
+
+**Make file helpers**
+Makefile.deploy-common-targets must have been included in the main make file
+
+- ``make version`` will print the version which will be released.
+- ``make update-version`` will update version.properties with new version
+- ``make git-tag`` Tags the current version and pushes to github
+- ```make release``` will update version, build docker image, push the image to docker hub and tag to github
+
 # Refs
 
 links for using make and docker
