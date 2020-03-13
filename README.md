@@ -32,7 +32,7 @@ semver bump major 10.0.0 > 11.0.0
 
 **Make file helpers**
 
-Makefile.deploy-common-targets must have been included in the main make file
+Makefile.deploy-common-targets must have been included in the main make file of the target project
 
 - ``make version`` will print the version which will be released.
 - ``make update-version`` will update version.properties with new version
