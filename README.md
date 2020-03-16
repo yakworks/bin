@@ -51,7 +51,6 @@ updateVersionProps 10.0.11 #Will update version.properties with version=10.0.11
 | Make target  |  Note |
 | ------------- | ----- |
 | `make version` | prints the version which will be released. |
-| `make version` | prints the version which will be released. |
 | `make update-version` | updates version.properties with new version |
 | `make git-tag` | Tags the current version and pushes to github |
 | `make release` | it depends on following targets `update-version` `build/docker-build` `build/docker-deploy` `git-tag` <br/><br/> so it will update the version, build docker image, push image to dockerhub and then create a git tag 
