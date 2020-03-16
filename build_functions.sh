@@ -128,7 +128,12 @@ function setBuildEnv {
 
 #Increments the given version and returns it
 function incrementVersion {
-  echo $(build/bin/semver bump $@)
+   FILE=./semver
+  if [ -f "$FILE" ]; then
+    echo $(./semver bump $@)
+  else
+    echo $(build/bin/semver bump $@)
+  fi
 }
 
 #Updates version.properties with given version
