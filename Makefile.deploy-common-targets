@@ -18,12 +18,12 @@ kube-port-forward: ## runs kubectl port-forward to the ${KUB_DB_SERVICE_NAME}
 version: #Prints the version which will be released
 	@echo $(VERSION)
 
-update-version: #Increments version in version.properties
-	@${build.sh} updateVersion ${VERSION}
+update-version: #updates version in version.properties
+	@${build.sh} updateVersionProps ${VERSION}
 
 git-tag: ##creates new git tag and pushes to github
 	git add .
-	git commit -m "bumped to version $(VERSION)" ;
+	git commit -m "bumped version to $(VERSION)" ;
 	git tag $(VERSION)
 	#@ if [ -n "$(shell git remote -v)" ] ; then git push --tags ; else echo 'no remote to push tags to' ; fi
 

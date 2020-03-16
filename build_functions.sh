@@ -132,7 +132,7 @@ function incrementVersion {
 }
 
 #Updates version.properties with given version
-function updateVersion {
+function updateVersionProps {
 if [ -n "$1" ] ; then
 		sed -i.x -e "s/^version=.*/version=$1/g" version.properties
 		rm -f version.properties.x

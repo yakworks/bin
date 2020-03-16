@@ -10,41 +10,55 @@ common scripts, templates and helpers for building and develpment
 - https://12factor.net
 
 ## Semantic versioning support
-```semver.sh ``` which is based on [this](https://github.com/fsaintjacques/semver-tool) tool provides utility
+`semver` which is based on [this](https://github.com/fsaintjacques/semver-tool) tool provides utility
 to manipulate semantic version strings from bash scripts.
 
-syntax : ```semver bump (major|minor|patch|pre-release) <version>```
+syntax : `semver bump (major|minor|patch|pre-release) <version>`
 
 Note: Version must be properly formatted as a semantic version string
 
+
 **Examples**: 
 
+| command  | output |
+| ------------- | ------------- |
+|./semver bump pre-release 10.0.0-RC.1 | 10.0.0-RC.2 |
+|./semver bump patch 10.0.0| 10.0.1 |
+|./semver bump minor 10.0.0| 10.1.0 |
+|./semver bump major 10.0.0 | 11.0.0 |
+
+
+Note: `./semver bump pre-release` will work only if the version has pre release part, eg `10.0.0-RC.2`
+
+**`build_functions.sh`** helpers
+
+| command  | output | Note |
+| ------------- | ------------- |----- |
+|`incrementVersion patch 10.0.0` | 10.0.1| Helper method to increment version. It calls `semver bump` with given arguments
+|`updateVersionProps 10.0.0-RC.1` | updates the version.properties with given version string | it expects version.properties in current directory|
+
+
+**Example**
+
 ```bash
-semver bump pre-release 10.0.0-RC.1 > 10.0.0-RC.2
-semver bump patch 10.0.0 > 10.0.1
-semver bump minor 10.0.0 > 10.1.0
-semver bump major 10.0.0 > 11.0.0
+source ./build_functions.sh
+incrementVersion patch 10.0.0 #Will output 10.0.1
+updateVersionProps 10.0.11 #Will update version.properties with version=10.0.11
 ```
-
-Note: bump pre-release will work only if the version has pre release part, major.minor.patch-PRE.x (PRE could be any thing, eg RC.1)
-
-**```build_functions.sh```** helpers
-- provides a helper method to bump version using eg. ```incrementVersion(patch 10.0.0)```
-- update version.properties with given version. ```updateVersion(10.0.0-RC.1)```
 
 **Make file helpers**
 
-Makefile.deploy-common-targets must have been included in the main make file of the target project
+| Make target  |  Note |
+| ------------- | ----- |
+| `make version` | prints the version which will be released. |
+| `make version` | prints the version which will be released. |
+| `make update-version` | updates version.properties with new version |
+| `make git-tag` | Tags the current version and pushes to github |
+| `make release` | it depends on following targets `update-version` `build/docker-build` `build/docker-deploy` `git-tag` <br/><br/> so it will update the version, build docker image, push image to dockerhub and then create a git tag 
 
-- ``make version`` will print the version which will be released.
-- ``make update-version`` will update version.properties with new version
-- ``make git-tag`` Tags the current version and pushes to github
-- ``make release`` will update version, build docker image, push the image to docker hub and tag to github
 
-**How to use semantic version and release support in another projects**
-- The project must have a version.properties file with proper semantic version
-- within build.sh of the project, source build_functions.sh and use updateVersion/incrementVersion as explained above to manipulate versions as required
-- Within main make file of the project, include ``Makefile.deploy-common-targets``. The above mentioned common targets will be available to the project.
+`Makefile.deploy-common-targets` must have been included in the main make file of the target project
+eg. `include /PATH-TO/Makefile.deploy-common-targets`
 
 
 # Refs
