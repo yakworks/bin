@@ -203,7 +203,6 @@ function compare-version {
 
 function command-bump {
   local new; local version; local sub_version; local command;
-
   case $1 in
     major|minor|patch|release) command=$1; version=$2;;
     pre-release|build) command=$1; sub_version=$2 version=$2 ;;
@@ -219,7 +218,7 @@ function command-bump {
   local prere="${parts[3]}"
   local build="${parts[4]}"
 
-  if [[ ! -z ${sub_version} ]];
+  if [[ $1 =~ ^(pre-release|build)$ && ! -z ${sub_version} ]];
   then
     sub_version=$(increment_subver $prere)
   fi
