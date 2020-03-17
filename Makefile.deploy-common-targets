@@ -14,3 +14,18 @@ kube-create-ns: # creates the KUB_NAMESPACE namespace if its doesn't exist
 
 kube-port-forward: ## runs kubectl port-forward to the ${KUB_DB_SERVICE_NAME}
 	kubectl port-forward --namespace=${KUB_NAMESPACE} --address 0.0.0.0 service/${KUB_DB_SERVICE_NAME} 1${DB_PORT}:${DB_PORT}
+
+version: #Prints the version which will be released
+	@echo $(VERSION)
+
+update-version: #updates version in version.properties
+	@${build.sh} updateVersionProps ${VERSION}
+
+git-tag: ##creates new git tag and pushes to github
+	git add .
+	git commit -m "bumped version to $(VERSION)" ;
+	git tag $(VERSION)
+	#@ if [ -n "$(shell git remote -v)" ] ; then git push --tags ; else echo 'no remote to push tags to' ; fi
+
+release: update-version build/docker-build build/docker-deploy git-tag #Create and push git tag, build new docker image, push to dockerhub
+
