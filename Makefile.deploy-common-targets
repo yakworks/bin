@@ -22,10 +22,7 @@ update-version: #updates version in version.properties
 	@${build.sh} updateVersionProps ${VERSION}
 
 git-tag: ##creates new git tag and pushes to github
-	git add .
-	git commit -m "[skip ci] bumped version to $(VERSION)" ;
-	git tag $(VERSION)
-	#@ if [ -n "$(shell git remote -v)" ] ; then git push --tags ; else echo 'no remote to push tags to' ; fi
+	@${github.sh} tag $(VERSION) "[skip ci] bumped version to $(VERSION)"
+	@${github.sh} push_tags
 
 release: update-version build/docker-build build/docker-deploy git-tag #Create and push git tag, build new docker image, push to dockerhub
-

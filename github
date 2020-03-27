@@ -8,11 +8,16 @@ ghPagesDir=build/gh-pages
 
 # ---- GitHub Project Variables Setup ----
 # the format : ${SOME_VAR:=foo} means that if SOME_VAR is not already set then set to foo
+
+repoSlug=$(git config --get remote.origin.url | cut -d/ -f5 | cut -d. -f1)
+
 : ${GITHUB_OWNER:=9ci}
+: ${GITHUB_REPO:=$CIRCLE_PROJECT_REPONAME}
+: ${GITHUB_REPO:=$repoSlug}
 
 GITHUB_FULLNAME="$GITHUB_OWNER/$GITHUB_REPO"
 GITHUB_BASE_URL="github.com/$GITHUB_FULLNAME.git"
-GITHUB_URL="https://$GH_BASE_URL"
+GITHUB_URL="https://$GITHUB_BASE_URL"
 # For CI the git user token will be set in env var.
 if [[ $GRGIT_USER ]]; then
   # add the token
@@ -22,8 +27,8 @@ fi
 : ${GITHUB_BOT_USER:=9cibot}
 : ${GITHUB_BOT_EMAIL:=9cibot@9ci.com}
 
-echo "GITHUB_BOT_USER $GITHUB_BOT_USER"
-echo "GITHUB_BOT_EMAIL $GITHUB_BOT_EMAIL"
+#echo "GITHUB_BOT_USER $GITHUB_BOT_USER"
+#echo "GITHUB_BOT_EMAIL $GITHUB_BOT_EMAIL"
 
 # clones gh-pages into the build directory
 function clone_gh_pages {
@@ -58,6 +63,26 @@ function init_gh_pages {
   git rm -rf .
   echo "github pages site" > README.md
   push_gh_pages
+}
+
+# creates a git tag
+function tag {
+  git add .
+  git commit -m "$2"
+  git tag $1
+}
+
+#Push git tags to github
+function push_tags {
+  git push -q --tags $GITHUB_URL master
+}
+
+#Just a helper to show variables which can be useful for debugging
+function show_info {
+  echo "Repo: $GITHUB_REPO"
+  echo "Url: $GITHUB_URL"
+  echo "User: $GITHUB_BOT_USER"
+  echo "Email: $GITHUB_BOT_EMAIL"
 }
 
 # --- boiler plate function runner, keep at end of file ------
