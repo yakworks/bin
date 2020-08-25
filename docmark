@@ -42,10 +42,10 @@ function docmark_shell {
     $DOCMARK_IMAGE
 }
 
-# build using docker, use for local, not for CI.
+# build the docs, should be run inside the docmark docker
 function docmark_build {
   cp_readme_index
-  mkdocs build --site-dir build/site
+  docmark build --site-dir build/site
 }
 
 # checks out and then publishes to gh-pages.
