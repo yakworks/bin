@@ -24,12 +24,21 @@ function dockmark_run {
     $DOCMARK_IMAGE $1
 }
 
-# Copies readme and fixs links that went into docs
+# Copies readme and replaces links that went into docs
 function cp_readme_index {
   rm -f docs/index.md
   cp README.md docs/index.md
   # replace the (docs/ text in links as they are in same dir now, ex [foo](docs/bar.md) will become [foo](bar.md)
   sed -i -e "s~(\s*docs\/~(~g" docs/index.md
+}
+
+# updates the version number in README
+function update_README_version {
+  sed -i -e "s|Version: [0-9.]*[-v]*[0-9.]*|Version: ${version}|g" SAND.md
+
+  # updatedContent = updatedContent.replaceFirst(/${p.name}:[\d\.]+[^"]+/, "${p.name}:$version")
+  # update any dependencies for plugin style versions, ie `id "yakworks.gorm-tools" version "1.2.3"`
+  # updatedContent = updatedContent.replaceFirst(/(?i)${p.name}"\sversion\s"[\d\.]+[^\s]+"/, "${p.name}\" version \"$version\"")
 }
 
 # use this to open shell and test circle commands
