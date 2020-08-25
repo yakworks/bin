@@ -19,7 +19,7 @@ if is_debug; then
 fi
 
 # Execute
-create_variables testing.yml
+create_yml_variables testing.yml
 
 # Functions
 function test_list() {
