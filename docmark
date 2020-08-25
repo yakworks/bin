@@ -16,10 +16,11 @@ function serve {
   run-dockmark
 }
 
-function run-dockmark {
+function dockmark_run {
   docker run --rm --name=mkdocs-serve \
     -v $(pwd):/project \
     -p 8000:8000 \
+    -e GRGIT_USER=${GRGIT_USER} \
     $DOCMARK_IMAGE $1
 }
 
@@ -31,6 +32,15 @@ function readme_copy {
   sed -i -e "s~(\s*docs\/~(~g" docs/index.md
 }
 
+function shell {
+  docker run --rm -it --name=mkdocs-serve \
+    -v $(pwd):/project \
+    -p 8000:8000 \
+    --entrypoint /bin/bash \
+    -e GRGIT_USER=${GRGIT_USER} \
+    $DOCMARK_IMAGE
+}
+
 # build using docker, use for local, not for CI.
 function build {
   readme_copy
@@ -40,9 +50,9 @@ function build {
 # checks out and then publishes to gh-pages.
 # expects that build was already run and sites exits in build
 function publish {
-  $binDir/github clone-gh-pages
-  cp -r build/site/. build/gh-pages
-  $binDir/github push-gh-pages
+  $binDir/github clone_gh_pages
+  # cp -r build/site/. build/gh-pages
+  # $binDir/github push-gh-pages
 }
 
 # custom circle publishing
