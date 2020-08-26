@@ -2,6 +2,7 @@
 # -----------------
 # Github helpers.
 # right now largely for publishign docs to github pages and pushing tags
+# DEPRECATED use git_tools - kept here for legacy usage
 # ------------------
 set -e
 ghPagesDir=build/gh-pages

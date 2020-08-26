@@ -4,24 +4,11 @@
 # depends on bin/github_pages script
 # ------------------
 
-set -e
-# source "$(dirname $0)/github.sh"
-binDir=$(dirname $0)
-#echo "binDir $binDir"
-
-DOCMARK_IMAGE=yakworks/docmark
+DOCMARK_DOCKER_IMAGE=yakworks/docmark
 
 function dockmark-serve {
   cp_readme_index
   dockmark_run
-}
-
-function dockmark_run {
-  docker run --rm -it --name=mkdocs-serve \
-    -v $(pwd):/project \
-    -p 8000:8000 \
-    -e GRGIT_USER=${GRGIT_USER} \
-    $DOCMARK_IMAGE $1
 }
 
 # Copies readme and replaces links that went into docs
@@ -30,25 +17,6 @@ function cp_readme_index {
   cp README.md docs/index.md
   # replace the (docs/ text in links as they are in same dir now, ex [foo](docs/bar.md) will become [foo](bar.md)
   sed -i -e "s~(\s*docs\/~(~g" docs/index.md
-}
-
-# updates the version number in README
-function update_README_version {
-  sed -i -e "s|Version: [0-9.]*[-v]*[0-9.]*|Version: ${version}|g" README.md
-
-  # updatedContent = updatedContent.replaceFirst(/${p.name}:[\d\.]+[^"]+/, "${p.name}:$version")
-  # update any dependencies for plugin style versions, ie `id "yakworks.gorm-tools" version "1.2.3"`
-  # updatedContent = updatedContent.replaceFirst(/(?i)${p.name}"\sversion\s"[\d\.]+[^\s]+"/, "${p.name}\" version \"$version\"")
-}
-
-# use this to open shell and test circle commands
-function docmark_shell {
-  docker run --rm -it --name=mkdocs-serve \
-    -v $(pwd):/project \
-    -p 8000:8000 \
-    --entrypoint /bin/bash \
-    -e GRGIT_USER=${GRGIT_USER} \
-    $DOCMARK_IMAGE
 }
 
 # build the docs, should be run inside the docmark docker
@@ -71,28 +39,22 @@ function docmark_publish {
   push_gh_pages
 }
 
-# custom circle publishing
-# assumes working dir is this projects root
-# expects the COMMIT_RANGE to be passe in as an $1 argument
-# FIXME why won't this work?
-# spits out Exited with code 1 on circle with no indicator, THIS WAS WORKING
-function circle-publish_FAILS_ {
-  #circle fills in the COMMIT_RANGE,
-  # can test this by setting COMMIT_RANGE
-  diffCmd="git diff $1 --name-status | grep -E \"(README\.md|mkdocs\.yml|docs/)\""
-  echo "running $diffCmd"
-  # needs eval or we get fatal: ambiguous argument '|' ...
-  hasChanges=$( eval $diffCmd )
-  echo "hasChanges $hasChanges"
-  if [ "$hasChanges" ]; then
-    echo "docs have changes"
-    # config github bot user
-    $binDir/github config-bot-user
-    build
-    publish
-  else
-    echo "docs not modified; no need to publish"
-  fi
+function dockmark_run {
+  docker run --rm -it --name=mkdocs-serve \
+    -v $(pwd):/project \
+    -p 8000:8000 \
+    -e GRGIT_USER=${GRGIT_USER} \
+    $DOCMARK_DOCKER_IMAGE $1
+}
+
+# use this to open shell and test circle commands
+function docmark_shell {
+  docker run --rm -it --name=mkdocs-serve \
+    -v $(pwd):/project \
+    -p 8000:8000 \
+    --entrypoint /bin/bash \
+    -e GRGIT_USER=${GRGIT_USER} \
+    $DOCMARK_DOCKER_IMAGE
 }
 
 # --- boiler plate function runner, keep at end of file ------

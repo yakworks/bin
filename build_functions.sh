@@ -4,6 +4,13 @@
 # [ ! -e build/bin ] && git clone https://github.com/yakworks/bin.git build/bin --single-branch --depth 1
 # source build/bin/build_functions.sh
 # ---
+binDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source ${binDir}/yaml
+source ${binDir}/versions
+# source imports for build helper functions
+source ${binDir}/circle
+source ${binDir}/git_tools
+source ${binDir}/docmark
 
 # dummy function so that this can through first and clone the git yakworks/bin
 function init {
@@ -20,6 +27,11 @@ function setVar {
 
 function setVersion {
   setVar VERSION "$1"
+  # set the BUILD_VERSION for libs to default to version
+  buildVer="$VERSION"
+  # if its a snapshot then append the SNAPSHOT
+  [ "$snapshot" == "true" ] && buildVer="$VERSION-SNAPSHOT"
+  setVar BUILD_VERSION "$buildVer"
   # ${version%.*} returns the version from source version.properties without last dot so we can add the .x
   # will turn 10.0.2 into 10.0.x
   major_and_minor=$(echo $VERSION | cut -d. -f1,2)
@@ -136,13 +148,3 @@ function incrementVersion {
   fi
 }
 
-#Updates version.properties with given version
-function updateVersionProps {
-if [ -n "$1" ] ; then
-		sed -i.x -e "s/^version=.*/version=$1/g" version.properties
-		rm -f version.properties.x
-	else
-		echo "ERROR: missing version parameter " >&2
-		return 1
-	fi
-}

@@ -2,6 +2,7 @@
 # -----------------
 # functions for running mkdocs
 # depends on bin/github script
+# DEPRECATED!! Use docmark
 # ------------------
 
 set -e

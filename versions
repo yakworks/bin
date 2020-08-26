@@ -1,0 +1,54 @@
+#!/bin/bash
+# ---
+# Some common helpers to work with version
+# ---
+
+# increments version so 9.8.7 will return 9.8.8 and 9.8.7-RC.1 returns 9.8.7-RC.2
+# arg $1 - the version to bump
+function bumpPatchLevel {
+  local ver=${1:-$(getRelease)}
+  local dotCount=$(echo "${ver}" | awk -F"." '{print NF-1}')
+  # cuts to the last dot
+	local baseVersion=$(echo $ver | cut -d. -f1-$dotCount)
+  # echo "major_and_minor $major_and_minor"
+  local endPathLoc=$((dotCount+1))
+  # grabs last part of version number
+	local patch=$(echo $ver | cut -d. -f$endPathLoc)
+  # echo "patch $patch"
+	ver=$(printf "%s.%d" $baseVersion $(($patch + 1)))
+	echo $ver
+}
+
+# bumps the current $VERSION and updates the version.properties
+function bumpUpdateVersionProps {
+  local newVer=$( bumpPatchLevel $VERSION)
+  updateVersionProps $newVer
+}
+
+# Updates version.properties with given version and sets previousVersion to the $VERSION
+# arg $1 - the new version
+function updateVersionProps {
+  if [ -n "$1" ] ; then
+	  sed -i.x -e "s/^version=.*/version=$1/g" version.properties
+    sed -i.x -e "s/^previousVersion=.*/previousVersion=$VERSION/g" version.properties
+		rm -f version.properties.x
+	else
+		echo "ERROR: missing version parameter " >&2
+		return 1
+	fi
+}
+
+# updates the version number in README
+function update_README_version {
+  sed -i -e "s|Version: [0-9.]*[-v]*[0-9.]*|Version: ${version}|g" README.md
+
+  # updatedContent = updatedContent.replaceFirst(/${p.name}:[\d\.]+[^"]+/, "${p.name}:$version")
+  # update any dependencies for plugin style versions, ie `id "yakworks.gorm-tools" version "1.2.3"`
+  # updatedContent = updatedContent.replaceFirst(/(?i)${p.name}"\sversion\s"[\d\.]+[^\s]+"/, "${p.name}\" version \"$version\"")
+}
+
+# --- boiler plate function runner, keep at end of file ------
+# BASH_SOURCE check will be true if this is run, false if imported into another script with `source`
+if [[ "${#BASH_SOURCE[@]}" == 1 ]]; then
+  source "$(dirname $0)/function_runner.sh"
+fi

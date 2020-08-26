@@ -1,0 +1,42 @@
+#!/bin/bash
+# ---
+# working with circle
+# ---
+
+# echos the commit message
+function ciCommitMessage {
+  #CIRCLE_SHA1=c400d6b1a1332e9ecd7a1512d1840c8a0acd2589
+  git log --format="%s" -n 1 $CIRCLE_SHA1
+}
+
+
+# custom circle publishing
+# assumes working dir is this projects root
+# expects the COMMIT_RANGE to be passe in as an $1 argument
+# FIXME why won't this work?
+# spits out Exited with code 1 on circle with no indicator, THIS WAS WORKING
+function circle-publish_FAILS_ {
+  #circle fills in the COMMIT_RANGE,
+  # can test this by setting COMMIT_RANGE
+  diffCmd="git diff $1 --name-status | grep -E \"(README\.md|mkdocs\.yml|docs/)\""
+  echo "running $diffCmd"
+  # needs eval or we get fatal: ambiguous argument '|' ...
+  hasChanges=$( eval $diffCmd )
+  echo "hasChanges $hasChanges"
+  if [ "$hasChanges" ]; then
+    echo "docs have changes"
+    # config github bot user
+    $binDir/github config-bot-user
+    build
+    publish
+  else
+    echo "docs not modified; no need to publish"
+  fi
+}
+
+
+# --- boiler plate function runner, keep at end of file ------
+# BASH_SOURCE check will be true if this is run, false if imported into another script with `source`
+if [[ "${#BASH_SOURCE[@]}" == 1 ]]; then
+  source "$(dirname $0)/function_runner.sh"
+fi

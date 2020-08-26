@@ -1,0 +1,159 @@
+#!/bin/bash
+# -----------------
+# Github helpers.
+# right now largely for publishign docs to github pages and pushing tags
+# uses the variables set from gradle/build.yml
+# ------------------
+
+ghPagesDir=build/gh-pages
+
+# initialize variables for github
+# arg $1 - the github_fullName in the format of owner/repo
+function initGithubVars {
+  # use github_fullName which comes from build.yml
+  local repoSlug=${1:-$github_fullName}
+  echo "repoSlug $repoSlug"
+  if [ -z "$repoSlug" ]; then
+    echo "repo slug not passed in, trying `git config --get remote.origin.url`"
+    repoSlug=$(git config --get remote.origin.url | cut -d/ -f5 | cut -d. -f1)
+  fi
+  GITHUB_FULLNAME=${repoSlug:-UNKNOWN}
+  echo "initGithubVars with $GITHUB_FULLNAME"
+  # GITHUB_FULLNAME="$GITHUB_OWNER/$GITHUB_REPO"
+  GITHUB_LINK_URL="https://github.com/${GITHUB_FULLNAME}"
+  GITHUB_BASE_URL="github.com/${GITHUB_FULLNAME}.git"
+  GITHUB_URL="https://$GITHUB_BASE_URL"
+  # For CI the git user token will be set in env var.
+  if [[ $GRGIT_USER ]]; then
+    # add the token
+    GITHUB_URL="https://dummy:${GRGIT_USER}@$GITHUB_BASE_URL"
+  fi
+
+  : ${GITHUB_BOT_USER:=9cibot}
+  : ${GITHUB_BOT_EMAIL:=9cibot@9ci.com}
+}
+
+# clones gh-pages into the build directory
+function clone_gh_pages {
+  mkdir -p build
+  rm -rf $ghPagesDir
+  git clone $GITHUB_URL build/gh-pages -b gh-pages --single-branch --depth 1
+}
+
+# in build/gh-pages commits and pushes gh pages
+function push_gh_pages {
+  git -C $ghPagesDir add -A .
+  git -C $ghPagesDir commit -a -m "CI Docs published [skip ci]" || true
+  git -C $ghPagesDir push -q $GITHUB_URL gh-pages || true
+}
+
+# sets up the 9cibot git user info for commit and push
+function config_bot_user {
+  git config credential.helper 'cache --timeout=120'
+  git config --global user.email "$GITHUB_BOT_EMAIL"
+  git config --global user.name "$GITHUB_BOT_USER"
+}
+
+# initializes a gh-pages branch for the first time
+# run this when setting up a new project's gh-pages
+function init_gh_pages {
+  mkdir -p build
+  cd build
+  rm -rf gh-pages
+  git clone $GITHUB_URL gh-pages
+  cd gh-pages
+  git checkout --orphan gh-pages
+  git rm -rf .
+  echo "github pages site" > README.md
+  push_gh_pages
+}
+
+# creates a git tag
+function git_tag {
+  git add .
+  git commit -m "$2"
+  git tag $1
+}
+
+#Push git tags to github
+function git_push_tags {
+  git push -q --tags $GITHUB_URL master
+}
+
+# updates the changelog
+# arg $1 - the LATEST_VERSION
+# arg $2 - the PREVIOUS_VERSION
+# arg $3 - the changelog filename
+function updateChangelog {
+  [ "$GITHUB_LINK_URL" ] || initGithubVars
+  # Repo URL to base links off of
+  local REPOSITORY_URL=$GITHUB_LINK_URL  #https://github.com/yakworks/gorm-tools
+
+  # Get a list of all tags in reverse order
+  # Assumes the tags are in version format like v1.2.3
+  local GIT_TAGS=$(git tag -l --sort=-version:refname)
+  local TAGS=($GIT_TAGS)
+  # Make the tags an array
+  # TAGS=($GIT_TAGS)
+  local LATEST_TAG="v$1" # v6.1.12-v.1
+  local PREVIOUS_TAG="v$2" # v6.1.11-v.14
+
+  # validate
+  if [[ ! " ${TAGS[@]} " =~ " ${LATEST_TAG} " ]]; then
+    echo "Error creating changelog - LATEST_TAG $LATEST_TAG does not exists"
+    return 0
+  fi
+  if [[ ! " ${TAGS[@]} " =~ " ${PREVIOUS_TAG} " ]]; then
+    echo "Error creating changelog - PREVIOUS_TAG $PREVIOUS_TAG does not exists"
+    return 0
+  fi
+
+  # We only get the commit hash so we don't have to deal with a bunch of ugly parsing
+  # See Pretty format placeholders at https://git-scm.com/docs/pretty-formats
+  local COMMITS=$(git log $PREVIOUS_TAG..$LATEST_TAG --pretty=format:"%H")
+  # echo "COMMITS $COMMITS"
+  # Store our changelog in a variable to be saved to a file at the end
+  local MARKDOWN="#### 6.1.12-v.1\n"
+  MARKDOWN+='\n'
+  MARKDOWN+="[Full Changelog]($REPOSITORY_URL/compare/$PREVIOUS_TAG...$LATEST_TAG)"
+
+  # Loop over each commit and look for merged pull requests
+  for COMMIT in $COMMITS; do
+    # Get the subject of the current commit
+    local SUBJECT=$(git log -1 ${COMMIT} --pretty=format:"%s")
+    # echo "SUBJECT $SUBJECT"
+    # If the subject contains [ci skip] then skip it
+    local PULL_REQUEST=$( grep --invert-match -Eo "\[ci skip\]" <<< "$SUBJECT" )
+    if [[ $PULL_REQUEST ]]; then
+      # AUTHOR_NAME=$(git log -1 ${COMMIT} --pretty=format:"%an")
+      # AUTHOR_EMAIL=$(git log -1 ${COMMIT} --pretty=format:"%ae")
+
+      # Get the body of the commit
+      # BODY=$(git log -1 ${COMMIT} --pretty=format:"%b")
+      # echo "BODY $BODY"
+
+      MARKDOWN+='\n'
+      MARKDOWN+=" - $SUBJECT [$COMMIT]($REPOSITORY_URL/commit/$COMMIT)" # : $BODY"
+    fi
+  done
+  MARKDOWN+='\n'
+  echo -e "$MARKDOWN\n$(cat $3)" > $3
+  # Save our markdown to a file
+  #echo -e $MARKDOWN > CHANGELOG.md
+}
+
+#Just a helper to show variables which can be useful for debugging
+function git_debug {
+  [ "$GITHUB_URL" ] || initGithubVars
+  echo "GITHUB_FULLNAME: $GITHUB_FULLNAME"
+  echo "GITHUB_BASE_URL: $GITHUB_BASE_URL"
+  echo "GITHUB_URL: $GITHUB_URL"
+  echo "GITHUB_BOT_USER: $GITHUB_BOT_USER"
+  echo "GITHUB_BOT_EMAIL: $GITHUB_BOT_EMAIL"
+}
+
+# --- boiler plate function runner, keep at end of file ------
+# BASH_SOURCE check will be true if this is run, false if imported into another script with `source`
+if [[ "${#BASH_SOURCE[@]}" == 1 ]]; then
+  source "$(dirname $0)/function_runner.sh"
+fi
