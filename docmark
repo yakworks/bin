@@ -34,7 +34,7 @@ function cp_readme_index {
 
 # updates the version number in README
 function update_README_version {
-  sed -i -e "s|Version: [0-9.]*[-v]*[0-9.]*|Version: ${version}|g" SAND.md
+  sed -i -e "s|Version: [0-9.]*[-v]*[0-9.]*|Version: ${version}|g" README.md
 
   # updatedContent = updatedContent.replaceFirst(/${p.name}:[\d\.]+[^"]+/, "${p.name}:$version")
   # update any dependencies for plugin style versions, ie `id "yakworks.gorm-tools" version "1.2.3"`
@@ -55,6 +55,12 @@ function docmark_shell {
 function docmark_build {
   cp_readme_index
   docmark build --site-dir build/site
+}
+
+# builds the groovydocs and copies them into site/api
+function groovydocs_build {
+  ./gradlew groovydocMerge
+  cp -r build/docs/groovydoc build/site/api
 }
 
 # checks out and then publishes to gh-pages.
