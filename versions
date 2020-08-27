@@ -1,12 +1,33 @@
 #!/bin/bash
 # ---
-# Some common helpers to work with version
+# Some common helpers to work with version,
+# depends on build_functions and that should have been loaded first so it has the setVar
 # ---
+
+function setVersion {
+  # if nothing passing in the usee the lowercase version that should have come in from version.properties
+  local ver=${1:-$version}
+  setVar VERSION "$ver"
+  # set the BUILD_VERSION for libs to default to version
+  local buildVer="$VERSION"
+  # if its a snapshot then append the SNAPSHOT
+  [ "$snapshot" == "true" ] && buildVer="$VERSION-SNAPSHOT"
+  setVar BUILD_VERSION "$buildVer"
+
+  local dotCount=$(echo "${VERSION}" | awk -F"." '{print NF-1}')
+  # cuts to the last dot
+	local baseVersion=$(echo $VERSION | cut -d. -f1-$dotCount)
+  # ${version%.*} returns the version from source version.properties without last dot so we can add the .x
+  setVar VERSIONX "$baseVersion.x"
+  setVar NINEDB_VERSION "$VERSIONX"
+  #replace dots with - so 10.0.x turns into v10-0-x. kubernetes can't have dots in names
+  setVar VERX_NO_DOTS "v${VERSIONX//./-}"
+}
 
 # increments version so 9.8.7 will return 9.8.8 and 9.8.7-RC.1 returns 9.8.7-RC.2
 # arg $1 - the version to bump
 function bumpPatchLevel {
-  local ver=${1:-$(getRelease)}
+  local ver=${1:-$VERSION}
   local dotCount=$(echo "${ver}" | awk -F"." '{print NF-1}')
   # cuts to the last dot
 	local baseVersion=$(echo $ver | cut -d. -f1-$dotCount)
@@ -46,9 +67,3 @@ function update_README_version {
   # update any dependencies for plugin style versions, ie `id "yakworks.gorm-tools" version "1.2.3"`
   # updatedContent = updatedContent.replaceFirst(/(?i)${p.name}"\sversion\s"[\d\.]+[^\s]+"/, "${p.name}\" version \"$version\"")
 }
-
-# --- boiler plate function runner, keep at end of file ------
-# BASH_SOURCE check will be true if this is run, false if imported into another script with `source`
-if [[ "${#BASH_SOURCE[@]}" == 1 ]]; then
-  source "$(dirname $0)/function_runner.sh"
-fi

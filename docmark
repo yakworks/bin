@@ -26,8 +26,7 @@ function docmark_build {
 }
 
 # builds the groovydocs and copies them into site/api
-function groovydocs_build {
-  ./gradlew groovydocMerge
+function copyGroovydocToApi {
   cp -r build/docs/groovydoc build/site/api
 }
 
@@ -37,6 +36,12 @@ function docmark_publish {
   clone_gh_pages
   cp -r build/site/. build/gh-pages
   push_gh_pages
+}
+
+function publishDocs {
+  config_bot_user
+  docmark_build
+  docmark_publish
 }
 
 function dockmark_run {

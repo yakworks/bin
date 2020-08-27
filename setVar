@@ -1,0 +1,6 @@
+# sets the variable and tracks its name in BUILD_VARS
+function setVar {
+  # declare -g "$1"="$2" # not working in older bash 3 on mac
+  eval $1=\$2
+  [[ ! $BUILD_VARS == *" $1 "* ]] && BUILD_VARS+="$1 "
+}

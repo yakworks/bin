@@ -9,28 +9,67 @@ function ciCommitMessage {
   git log --format="%s" -n 1 $CIRCLE_SHA1
 }
 
+# echos the commit message
+function setup_CIRCLE_COMPARE_URL {
+  CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
+  echo "CIRCLE_COMPARE_URL $CIRCLE_COMPARE_URL"
+  CIRCLE_COMMIT_RANGE=$(echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev)
+  echo "CIRCLE_COMMIT_RANGE $CIRCLE_COMMIT_RANGE"
+  HAS_DOC_CHANGES=$(git diff $CIRCLE_COMMIT_RANGE --name-status | grep -E "(README\.md|mkdocs\.yml|docs/)")
+  # app changes if anything other than the doc files have changed
+  HAS_APP_CHANGES=$(git diff $CIRCLE_COMMIT_RANGE --name-status | grep -v -E "(README\.md|mkdocs\.yml|docs/)")
+  if [ ${HAS_DOC_CHANGES:+1} ]; then
+    echo "HAS_DOC_CHANGES $HAS_DOC_CHANGES"
+  fi
+  if [ ${HAS_APP_CHANGES:+1s} ]; then
+    echo "HAS_APP_CHANGES $HAS_APP_CHANGES"
+  fi
+}
 
-# custom circle publishing
-# assumes working dir is this projects root
-# expects the COMMIT_RANGE to be passe in as an $1 argument
-# FIXME why won't this work?
-# spits out Exited with code 1 on circle with no indicator, THIS WAS WORKING
-function circle-publish_FAILS_ {
-  #circle fills in the COMMIT_RANGE,
-  # can test this by setting COMMIT_RANGE
-  diffCmd="git diff $1 --name-status | grep -E \"(README\.md|mkdocs\.yml|docs/)\""
-  echo "running $diffCmd"
-  # needs eval or we get fatal: ambiguous argument '|' ...
-  hasChanges=$( eval $diffCmd )
-  echo "hasChanges $hasChanges"
-  if [ "$hasChanges" ]; then
-    echo "docs have changes"
-    # config github bot user
-    $binDir/github config-bot-user
-    build
-    publish
+# publish the docmark docs
+function ciPublishDocs {
+  setup_CIRCLE_COMPARE_URL
+  if [ "$HAS_DOC_CHANGES" ]; then
+    echo "docs have changes, calling publishDocs"
+    publishDocs
   else
     echo "docs not modified; no need to publish"
+  fi
+}
+
+
+# checks if the passed in branch name matches the regex for releasable
+# arg $1 - the current branch name
+# arg $2 - the releasableBranchRegex
+function matchReleaseBranch {
+  echo "$1" | grep -E "$2" || true
+}
+
+# does th logic for CI to publish the lib
+function publishLib {
+  CIRCLE_BRANCH="master"
+  releasableBranch=$( matchReleaseBranch $CIRCLE_BRANCH $git_releasableBranchRegex)
+  if [ ${releasableBranch:+1} ]; then
+    echo "on a releasableBranch $CIRCLE_BRANCH"
+    # ./gradlew publish
+    if [ "$snapshot" == "false" ]; then
+      echo "snapshot is false"
+
+      echo "update the changelog"
+      updateChangelog $VERSION $previousVersion $CHANGELOG_NAME
+
+      echo "update version in README"
+      update_README_version
+
+      echo "create groovyDocs"
+      ./gradlew groovydocMerge
+
+      echo "increment the version.properties"
+      bumpUpdateVersionProps
+
+    fi
+  else
+    echo "publishLib called and not a releasableBranch"
   fi
 }
 

@@ -1,44 +1,24 @@
 # ---
-# commons helpers and functions for build.sh, expects a BUILD_VARS to be populated when functions called
+# commons base helpers and functions for build.sh, expects a BUILD_VARS to be populated when functions called
 # meant to be imported like so
 # [ ! -e build/bin ] && git clone https://github.com/yakworks/bin.git build/bin --single-branch --depth 1
 # source build/bin/build_functions.sh
 # ---
 binDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source ${binDir}/setVar
 source ${binDir}/yaml
-source ${binDir}/versions
-# source imports for build helper functions
 source ${binDir}/circle
 source ${binDir}/git_tools
 source ${binDir}/docmark
+source ${binDir}/versions
+
+# source the version.properties
+source version.properties
+setVersion $version
 
 # dummy function so that this can through first and clone the git yakworks/bin
 function init {
   echo "init"
-}
-
-# sets the variable and tracks its name in BUILD_VARS
-# also tracks BUILD_VARS_SED_ARGS for doing a sed replace on template files
-function setVar {
-  # declare -g "$1"="$2" # not working in older bash 3 on mac
-  eval $1=\$2
-  [[ ! $BUILD_VARS == *" $1 "* ]] && BUILD_VARS+="$1 "
-}
-
-function setVersion {
-  setVar VERSION "$1"
-  # set the BUILD_VERSION for libs to default to version
-  buildVer="$VERSION"
-  # if its a snapshot then append the SNAPSHOT
-  [ "$snapshot" == "true" ] && buildVer="$VERSION-SNAPSHOT"
-  setVar BUILD_VERSION "$buildVer"
-  # ${version%.*} returns the version from source version.properties without last dot so we can add the .x
-  # will turn 10.0.2 into 10.0.x
-  major_and_minor=$(echo $VERSION | cut -d. -f1,2)
-  setVar VERSIONX "$major_and_minor.x"
-  setVar NINEDB_VERSION "$VERSIONX"
-  #replace dots with - so 10.0.x turns into v10-0-x. kubernetes can't have dots in names
-  setVar VERX_NO_DOTS "v${VERSIONX//./-}"
 }
 
 # sets up defaults vars for docker ninedb and dock builders
