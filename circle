@@ -25,14 +25,9 @@ function ciInitVars {
   echo "CIRCLE_COMPARE_URL $CIRCLE_COMPARE_URL"
   CIRCLE_COMMIT_RANGE=$(echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev)
   echo "CIRCLE_COMMIT_RANGE $CIRCLE_COMMIT_RANGE"
-  git diff "$CIRCLE_COMMIT_RANGE" --name-status
-  echo "git diff ran"
-  git diff "$CIRCLE_COMMIT_RANGE" --name-status | grep -E "(README\.md|mkdocs\.yml|docs/)" || true
-  echo "git diff grep ran"
   HAS_DOC_CHANGES=$(git diff $CIRCLE_COMMIT_RANGE --name-status | grep -E "(README\.md|mkdocs\.yml|docs/)" || true)
   # app changes if anything other than the doc files have changed
-  echo "git diff $CIRCLE_COMMIT_RANGE"
-  HAS_APP_CHANGES=$(git diff $CIRCLE_COMMIT_RANGE --name-status | grep -v -E "(README\.md|mkdocs\.yml|docs/)")
+  HAS_APP_CHANGES=$(git diff $CIRCLE_COMMIT_RANGE --name-status | grep -v -E "(README\.md|mkdocs\.yml|docs/)" || true)
   if [ ${HAS_DOC_CHANGES:+1} ]; then
     echo "HAS_DOC_CHANGES: true"
   fi
