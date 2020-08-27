@@ -39,7 +39,6 @@ function docmark_publish {
 }
 
 function publishDocs {
-  config_bot_user
   docmark_build
   docmark_publish
 }

@@ -8,6 +8,7 @@ function setVersion {
   # if nothing passing in the usee the lowercase version that should have come in from version.properties
   local ver=${1:-$version}
   setVar VERSION "$ver"
+  setVar VERSION_TAG "v$VERSION"
   # set the BUILD_VERSION for libs to default to version
   local buildVer="$VERSION"
   # if its a snapshot then append the SNAPSHOT
@@ -41,14 +42,14 @@ function bumpPatchLevel {
 }
 
 # bumps the current $VERSION and updates the version.properties
-function bumpUpdateVersionProps {
+function bumpVersionFile {
   local newVer=$( bumpPatchLevel $VERSION)
-  updateVersionProps $newVer
+  updateVersionFile $newVer
 }
 
 # Updates version.properties with given version and sets previousVersion to the $VERSION
 # arg $1 - the new version
-function updateVersionProps {
+function updateVersionFile {
   if [ -n "$1" ] ; then
 	  sed -i.x -e "s/^version=.*/version=$1/g" version.properties
     sed -i.x -e "s/^previousVersion=.*/previousVersion=$VERSION/g" version.properties

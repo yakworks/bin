@@ -1,7 +1,9 @@
 #!/bin/bash
 # ---
-# working with circle
+# working with CI circle and publishing,
+# should be imported into the main build.sh
 # ---
+set -e
 
 # initialize circle variables
 function ciInitVars {
@@ -15,9 +17,9 @@ function ciInitVars {
   fi
 
   CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
-  echo "CIRCLE_COMPARE_URL $CIRCLE_COMPARE_URL"
+  # echo "CIRCLE_COMPARE_URL $CIRCLE_COMPARE_URL"
   CIRCLE_COMMIT_RANGE=$(echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev)
-  echo "CIRCLE_COMMIT_RANGE $CIRCLE_COMMIT_RANGE"
+  # echo "CIRCLE_COMMIT_RANGE $CIRCLE_COMMIT_RANGE"
   HAS_DOC_CHANGES=$(git diff $CIRCLE_COMMIT_RANGE --name-status | grep -E "(README\.md|mkdocs\.yml|docs/)")
   # app changes if anything other than the doc files have changed
   HAS_APP_CHANGES=$(git diff $CIRCLE_COMMIT_RANGE --name-status | grep -v -E "(README\.md|mkdocs\.yml|docs/)")
@@ -54,33 +56,43 @@ function ciPublishLib {
   ciInitVars
   if [[ "$HAS_APP_CHANGES" && ${IS_RELEASABLE_BRANCH:+1} ]]; then
     echo "app has changes and IS_RELEASABLE_BRANCH:true ... calling publish"
-    # ./gradlew publish
+    publishLib
     if [ "$snapshot" == "false" ]; then
-      echo "snapshot:false ... doing release process"
-
-      echo "update the changelog"
-      updateChangelog $VERSION $previousVersion $CHANGELOG_NAME
-
-      echo "update version in README"
-      update_README_version
-
-      echo "create groovyDocs"
-      ./gradlew groovydocMerge
-
-      echo "increment the version.properties"
-      bumpUpdateVersionProps
-
-      echo "tag and commit"
-
+      releaseFiles
     fi
   else
     echo "app not modified or IS_RELEASABLE_BRANCH:false ... not publishing"
   fi
 }
 
+# this cane be overriden in the build.sh
+function publishLib {
+  echo "---- publishing to repo ----"
+  ./gradlew publish
+  echo "---- create groovyDocs ----"
+  ./gradlew groovydocMerge
+}
 
-# --- boiler plate function runner, keep at end of file ------
-# BASH_SOURCE check will be true if this is run, false if imported into another script with `source`
-if [[ "${#BASH_SOURCE[@]}" == 1 ]]; then
-  source "$(dirname $0)/function_runner.sh"
-fi
+# bumps version, updates change log, tags and pushes
+function releaseFiles {
+  echo "snapshot:false ... doing release process for version bump"
+  echo "---- update the changelog ----"
+  updateChangelog $VERSION $previousVersion $CHANGELOG_NAME
+
+  echo "update version in README"
+  update_README_version
+
+  echo "---- increment the version.properties ----"
+  bumpVersionFile
+
+  echo "---- add ver, RM and changelog files ----"
+  [ "$GITHUB_URL" ] || initGithubVars
+  git add README.md version.properties $CHANGELOG_NAME
+  git commit -m "$VERSION release, changelog, version [ci skip]"
+
+  echo "---- tag ----"
+  git tag -a $VERSION_TAG -m "Release $VERSION_TAG [ci skip]"
+
+  echo "--- push ---"
+  git push $GITHUB_URL $VERSION_TAG "$CIRCLE_BRANCH"
+}

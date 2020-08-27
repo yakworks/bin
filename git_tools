@@ -114,18 +114,18 @@ function updateChangelog {
   local PREVIOUS_TAG="v$2" # v6.1.11-v.14
 
   # validate
-  if [[ ! " ${TAGS[@]} " =~ " ${LATEST_TAG} " ]]; then
-    echo "Error creating changelog - LATEST_TAG $LATEST_TAG does not exists"
-    return 0
-  fi
+  # if [[ ! " ${TAGS[@]} " =~ " ${LATEST_TAG} " ]]; then
+  #   echo "Error creating changelog - LATEST_TAG $LATEST_TAG does not exists"
+  #   return 0
+  # fi
   if [[ ! " ${TAGS[@]} " =~ " ${PREVIOUS_TAG} " ]]; then
     echo "Error creating changelog - PREVIOUS_TAG $PREVIOUS_TAG does not exists"
-    return 0
+    return 1
   fi
 
   # We only get the commit hash so we don't have to deal with a bunch of ugly parsing
   # See Pretty format placeholders at https://git-scm.com/docs/pretty-formats
-  local COMMITS=$(git log $PREVIOUS_TAG..$LATEST_TAG --pretty=format:"%H")
+  local COMMITS=$(git log $PREVIOUS_TAG..HEAD --pretty=format:"%H")
   # echo "COMMITS $COMMITS"
   # Store our changelog in a variable to be saved to a file at the end
   local MARKDOWN="#### $LATEST_TAG\n"
