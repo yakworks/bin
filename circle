@@ -7,6 +7,7 @@ set -e
 
 # initialize circle variables
 function ciInitVars {
+  echo "ciInitVars"
   # for testing uncomment
   # CIRCLE_BRANCH="dev"
 
@@ -45,6 +46,7 @@ function ciPublishDocs {
 
 # does th logic for CI to publish the lib
 function ciPublishLib {
+  echo "ciPublishLib"
   ciInitVars
   if [[ "$HAS_APP_CHANGES" && ${IS_RELEASABLE_BRANCH:+1} ]]; then
     echo "app has changes and IS_RELEASABLE_BRANCH:true ... calling publish"
