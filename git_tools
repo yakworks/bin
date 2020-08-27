@@ -138,7 +138,7 @@ function updateChangelog {
     local SUBJECT=$(git log -1 ${COMMIT} --pretty=format:"%s")
     # echo "SUBJECT $SUBJECT"
     # If the subject contains [ci skip] then skip it
-    local PULL_REQUEST=$( grep --invert-match -Eo "\[ci skip\]" <<< "$SUBJECT" )
+    local PULL_REQUEST=$( grep -v -Eo "\[ci skip\]" <<< "$SUBJECT" )
     if [[ $PULL_REQUEST ]]; then
       # AUTHOR_NAME=$(git log -1 ${COMMIT} --pretty=format:"%an")
       # AUTHOR_EMAIL=$(git log -1 ${COMMIT} --pretty=format:"%ae")

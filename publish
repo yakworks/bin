@@ -54,8 +54,8 @@ function releaseFiles {
   git commit -m "$VERSION release, changelog, version [ci skip]"
 
   echo "---- tag ----"
-  git tag -a $VERSION_TAG -m "Release $VERSION_TAG [ci skip]"
+  git tag -fa $VERSION_TAG -m "Release $VERSION_TAG [ci skip]"
 
   echo "--- push ---"
-  git push $GITHUB_URL $VERSION_TAG "$1"
+  git push -f $GITHUB_URL $VERSION_TAG "$1"
 }
