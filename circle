@@ -3,14 +3,17 @@
 # working with circle
 # ---
 
-# echos the commit message
-function ciCommitMessage {
-  #CIRCLE_SHA1=c400d6b1a1332e9ecd7a1512d1840c8a0acd2589
-  git log --format="%s" -n 1 $CIRCLE_SHA1
-}
+# initialize circle variables
+function ciInitVars {
+  # for testing uncomment
+  # CIRCLE_BRANCH="dev"
 
-# echos the commit message
-function setup_CIRCLE_COMPARE_URL {
+  : ${RELEASABLE_BRANCHES:="master|release/.+"}
+  IS_RELEASABLE_BRANCH=$( matchReleaseBranch $CIRCLE_BRANCH $RELEASABLE_BRANCHES)
+  if [ ${IS_RELEASABLE_BRANCH:+1} ]; then
+    echo "IS_RELEASABLE_BRANCH: TRUE as CIRCLE_BRANCH : $CIRCLE_BRANCH matches RELEASABLE_BRANCHES $RELEASABLE_BRANCHES"
+  fi
+
   CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
   echo "CIRCLE_COMPARE_URL $CIRCLE_COMPARE_URL"
   CIRCLE_COMMIT_RANGE=$(echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev)
@@ -19,21 +22,22 @@ function setup_CIRCLE_COMPARE_URL {
   # app changes if anything other than the doc files have changed
   HAS_APP_CHANGES=$(git diff $CIRCLE_COMMIT_RANGE --name-status | grep -v -E "(README\.md|mkdocs\.yml|docs/)")
   if [ ${HAS_DOC_CHANGES:+1} ]; then
-    echo "HAS_DOC_CHANGES $HAS_DOC_CHANGES"
+    echo "HAS_DOC_CHANGES: true"
   fi
   if [ ${HAS_APP_CHANGES:+1s} ]; then
-    echo "HAS_APP_CHANGES $HAS_APP_CHANGES"
+    echo "HAS_APP_CHANGES: true"
   fi
+
 }
 
 # publish the docmark docs
 function ciPublishDocs {
-  setup_CIRCLE_COMPARE_URL
-  if [ "$HAS_DOC_CHANGES" ]; then
-    echo "docs have changes, calling publishDocs"
+  ciInitVars
+  if [[ "$HAS_DOC_CHANGES" && ${IS_RELEASABLE_BRANCH:+1} ]]; then
+    echo "docs have changes and IS_RELEASABLE_BRANCH:true ... calling publishDocs"
     publishDocs
   else
-    echo "docs not modified; no need to publish"
+    echo "docs not modified or IS_RELEASABLE_BRANCH:false ... not publishing docs"
   fi
 }
 
