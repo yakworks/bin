@@ -1,0 +1,61 @@
+#!/bin/bash
+# ---
+# common logic for publishing a release to either snapshot maven and bintray
+# ---
+
+# checks if the passed in branch name matches the regex for releasable
+# arg $1 - the current branch name
+# arg $2 - the releasableBranchRegex
+function matchReleaseBranch {
+  echo "$1" | grep -E "$2" || true
+}
+
+# this cane be overriden in the build.sh
+function publishLib {
+  if [ "$snapshot" == "false" ]; then
+    publishRelease
+  else
+    publishSnapshot
+  fi
+}
+
+# this can be overriden in the build.sh
+function publishSnapshot {
+  echo "---- publishing SNAPSHOT ----"
+  ./gradlew publish
+}
+
+# this can be overriden in the build.sh
+function publishRelease {
+  echo "---- publishing RELEASE ----"
+  if [ "$bintray_enabled" == "true" ]; then
+    ./gradlew bintrayUpload
+  else
+    ./gradlew publish
+  fi
+}
+
+# bumps version, updates change log, tags and pushes
+# arg $1 - the CI or release branch to push to, should be the active git branch that is checked out
+function releaseFiles {
+  echo "snapshot:false ... doing release process for version bump"
+  echo "---- update the changelog ----"
+  updateChangelog $VERSION $publishedVersion $CHANGELOG_NAME
+
+  echo "update version in README"
+  update_README_version
+
+  echo "---- increment the version.properties ----"
+  bumpVersionFile
+
+  echo "---- add ver, RM and changelog files ----"
+  [ "$GITHUB_URL" ] || initGithubVars
+  git add README.md version.properties $CHANGELOG_NAME
+  git commit -m "$VERSION release, changelog, version [ci skip]"
+
+  echo "---- tag ----"
+  git tag -a $VERSION_TAG -m "Release $VERSION_TAG [ci skip]"
+
+  echo "--- push ---"
+  git push $GITHUB_URL $VERSION_TAG "$1"
+}

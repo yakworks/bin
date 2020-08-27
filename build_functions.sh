@@ -6,11 +6,12 @@
 # ---
 binDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ${binDir}/setVar
-source ${binDir}/yaml
-source ${binDir}/circle
-source ${binDir}/git_tools
-source ${binDir}/docmark
 source ${binDir}/versions
+source ${binDir}/yaml
+source ${binDir}/git_tools
+source ${binDir}/publish
+source ${binDir}/circle
+source ${binDir}/docmark
 
 # source the version.properties
 source version.properties

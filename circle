@@ -43,56 +43,19 @@ function ciPublishDocs {
   fi
 }
 
-
-# checks if the passed in branch name matches the regex for releasable
-# arg $1 - the current branch name
-# arg $2 - the releasableBranchRegex
-function matchReleaseBranch {
-  echo "$1" | grep -E "$2" || true
-}
-
 # does th logic for CI to publish the lib
 function ciPublishLib {
   ciInitVars
   if [[ "$HAS_APP_CHANGES" && ${IS_RELEASABLE_BRANCH:+1} ]]; then
     echo "app has changes and IS_RELEASABLE_BRANCH:true ... calling publish"
-    publishLib
     if [ "$snapshot" == "false" ]; then
-      releaseFiles
+      publishRelease
+      releaseFiles $CIRCLE_BRANCH
+    else
+      publishSnapshot
+      echo "app not modified or IS_RELEASABLE_BRANCH:false ... not publishing"
     fi
   else
     echo "app not modified or IS_RELEASABLE_BRANCH:false ... not publishing"
   fi
-}
-
-# this cane be overriden in the build.sh
-function publishLib {
-  echo "---- publishing to repo ----"
-  ./gradlew publish
-  echo "---- create groovyDocs ----"
-  ./gradlew groovydocMerge
-}
-
-# bumps version, updates change log, tags and pushes
-function releaseFiles {
-  echo "snapshot:false ... doing release process for version bump"
-  echo "---- update the changelog ----"
-  updateChangelog $VERSION $publishedVersion $CHANGELOG_NAME
-
-  echo "update version in README"
-  update_README_version
-
-  echo "---- increment the version.properties ----"
-  bumpVersionFile
-
-  echo "---- add ver, RM and changelog files ----"
-  [ "$GITHUB_URL" ] || initGithubVars
-  git add README.md version.properties $CHANGELOG_NAME
-  git commit -m "$VERSION release, changelog, version [ci skip]"
-
-  echo "---- tag ----"
-  git tag -a $VERSION_TAG -m "Release $VERSION_TAG [ci skip]"
-
-  echo "--- push ---"
-  git push $GITHUB_URL $VERSION_TAG "$CIRCLE_BRANCH"
 }
