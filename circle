@@ -77,7 +77,7 @@ function publishLib {
 function releaseFiles {
   echo "snapshot:false ... doing release process for version bump"
   echo "---- update the changelog ----"
-  updateChangelog $VERSION $previousVersion $CHANGELOG_NAME
+  updateChangelog $VERSION $publishedVersion $CHANGELOG_NAME
 
   echo "update version in README"
   update_README_version

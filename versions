@@ -47,12 +47,12 @@ function bumpVersionFile {
   updateVersionFile $newVer
 }
 
-# Updates version.properties with given version and sets previousVersion to the $VERSION
+# Updates version.properties with given version and sets publishedVersion to the $VERSION
 # arg $1 - the new version
 function updateVersionFile {
   if [ -n "$1" ] ; then
 	  sed -i.x -e "s/^version=.*/version=$1/g" version.properties
-    sed -i.x -e "s/^previousVersion=.*/previousVersion=$VERSION/g" version.properties
+    sed -i.x -e "s/^publishedVersion=.*/publishedVersion=$VERSION/g" version.properties
 		rm -f version.properties.x
 	else
 		echo "ERROR: missing version parameter " >&2
