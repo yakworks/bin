@@ -43,7 +43,7 @@ function releaseFiles {
   updateChangelog $VERSION $publishedVersion $CHANGELOG_NAME
 
   echo "update version in README"
-  update_README_version
+  replaceVersionInFile README.md
 
   echo "---- increment the version.properties ----"
   bumpVersionFile

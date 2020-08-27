@@ -61,8 +61,9 @@ function updateVersionFile {
 }
 
 # updates the version number in README
-function update_README_version {
-  sed -i -e "s|Version: [0-9.]*[-v]*[0-9.]*|Version: ${version}|g" README.md
+# arg $1 - the file name to do the replace
+function replaceVersionInFile {
+  sed -i -e "s|Version: [0-9.]*[-v]*[0-9.]*|Version: ${version}|g" $1
 
   # updatedContent = updatedContent.replaceFirst(/${p.name}:[\d\.]+[^"]+/, "${p.name}:$version")
   # update any dependencies for plugin style versions, ie `id "yakworks.gorm-tools" version "1.2.3"`

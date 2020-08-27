@@ -14,8 +14,8 @@ function dockmark-serve {
 # Copies readme and replaces links that went into docs
 function cp_readme_index {
   rm -f docs/index.md
-  update_README_version
   cp README.md docs/index.md
+  replaceVersionInFile docs/index.md
   # replace the (docs/ text in links as they are in same dir now, ex [foo](docs/bar.md) will become [foo](bar.md)
   sed -i -e "s~(\s*docs\/~(~g" docs/index.md
 }
