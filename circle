@@ -51,8 +51,29 @@ function matchReleaseBranch {
 
 # does th logic for CI to publish the lib
 function publishLib {
-  CIRCLE_BRANCH="master"
-  releasableBranch=$( matchReleaseBranch $CIRCLE_BRANCH $git_releasableBranchRegex)
+  ciInitVars
+  if [[ "$HAS_APP_CHANGES" && ${IS_RELEASABLE_BRANCH:+1} ]]; then
+    echo "docs have changes and IS_RELEASABLE_BRANCH:true ... calling publish"
+    # ./gradlew publish
+    if [ "$snapshot" == "false" ]; then
+      echo "snapshot is false"
+
+      echo "update the changelog"
+      updateChangelog $VERSION $previousVersion $CHANGELOG_NAME
+
+      echo "update version in README"
+      update_README_version
+
+      echo "create groovyDocs"
+      ./gradlew groovydocMerge
+
+      echo "increment the version.properties"
+      bumpUpdateVersionProps
+
+    fi
+  else
+    echo "app not modified or IS_RELEASABLE_BRANCH:false ... not publishing"
+  fi
   if [ ${releasableBranch:+1} ]; then
     echo "on a releasableBranch $CIRCLE_BRANCH"
     # ./gradlew publish
