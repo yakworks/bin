@@ -70,31 +70,11 @@ function publishLib {
       echo "increment the version.properties"
       bumpUpdateVersionProps
 
+      echo "tag and commit"
+
     fi
   else
     echo "app not modified or IS_RELEASABLE_BRANCH:false ... not publishing"
-  fi
-  if [ ${releasableBranch:+1} ]; then
-    echo "on a releasableBranch $CIRCLE_BRANCH"
-    # ./gradlew publish
-    if [ "$snapshot" == "false" ]; then
-      echo "snapshot is false"
-
-      echo "update the changelog"
-      updateChangelog $VERSION $previousVersion $CHANGELOG_NAME
-
-      echo "update version in README"
-      update_README_version
-
-      echo "create groovyDocs"
-      ./gradlew groovydocMerge
-
-      echo "increment the version.properties"
-      bumpUpdateVersionProps
-
-    fi
-  else
-    echo "publishLib called and not a releasableBranch"
   fi
 }
 
