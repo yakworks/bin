@@ -50,13 +50,13 @@ function matchReleaseBranch {
 }
 
 # does th logic for CI to publish the lib
-function publishLib {
+function ciPublishLib {
   ciInitVars
   if [[ "$HAS_APP_CHANGES" && ${IS_RELEASABLE_BRANCH:+1} ]]; then
-    echo "docs have changes and IS_RELEASABLE_BRANCH:true ... calling publish"
+    echo "app has changes and IS_RELEASABLE_BRANCH:true ... calling publish"
     # ./gradlew publish
     if [ "$snapshot" == "false" ]; then
-      echo "snapshot is false"
+      echo "snapshot:false ... doing release process"
 
       echo "update the changelog"
       updateChangelog $VERSION $previousVersion $CHANGELOG_NAME
