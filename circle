@@ -27,6 +27,8 @@ function ciInitVars {
   echo "CIRCLE_COMMIT_RANGE $CIRCLE_COMMIT_RANGE"
   git diff "$CIRCLE_COMMIT_RANGE" --name-status
   echo "git diff ran"
+  git diff "$CIRCLE_COMMIT_RANGE" --name-status | grep -E "(README\.md|mkdocs\.yml|docs/)"
+  echo "git diff grep ran"
   HAS_DOC_CHANGES=$(git diff $CIRCLE_COMMIT_RANGE --name-status | grep -E "(README\.md|mkdocs\.yml|docs/)")
   # app changes if anything other than the doc files have changed
   echo "git diff $CIRCLE_COMMIT_RANGE"
