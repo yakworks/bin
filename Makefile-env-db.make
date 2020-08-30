@@ -21,8 +21,13 @@ else ifeq (h2,$(filter h2,${MAKECMDGOALS}))
   DB_VENDOR = h2
 endif
 
+# ----- if use-docker then force docker builder
+ifeq (docker-builder,$(filter docker-builder,${MAKECMDGOALS}))
+  IS_DOCKER_BUILDER = true
+endif
+
 # dummy targets so we dont get the make[1]: Nothing to be done for `xxx'.
-dummy_targets = dev seed test-env mysql sqlserver oracle h2
+dummy_targets = dev seed test-env mysql sqlserver oracle h2 use-docker
 .PHONY: $(dummy_targets)
 $(dummy_targets):
 	@:

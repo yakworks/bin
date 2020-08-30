@@ -1,7 +1,6 @@
 #!/bin/bash
 # -----------------
-# Github helpers.
-# right now largely for publishign docs to github pages and pushing tags
+# Github and git helpers.
 # uses the variables set from gradle/build.yml
 # ------------------
 
@@ -113,11 +112,6 @@ function updateChangelog {
   local LATEST_TAG="v$1" # v6.1.12-v.1
   local PREVIOUS_TAG="v$2" # v6.1.11-v.14
 
-  # validate
-  # if [[ ! " ${TAGS[@]} " =~ " ${LATEST_TAG} " ]]; then
-  #   echo "Error creating changelog - LATEST_TAG $LATEST_TAG does not exists"
-  #   return 0
-  # fi
   if [[ ! " ${TAGS[@]} " =~ " ${PREVIOUS_TAG} " ]]; then
     echo "Error creating changelog - PREVIOUS_TAG $PREVIOUS_TAG does not exists"
     return 1

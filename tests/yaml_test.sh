@@ -5,7 +5,7 @@
 # Configure
 set -e
 cd "$(dirname "${BASH_SOURCE[0]}")"
-source ../yaml.sh
+source ../yaml
 
 # Debug
 DEBUG="$1"

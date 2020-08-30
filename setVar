@@ -1,6 +1,29 @@
-# sets the variable and tracks its name in BUILD_VARS
-function setVar {
+#!/bin/bash
+
+# sets the variable even if its already set
+# args $1 - the variable name
+# args $2 - the variable value to set
+function putVar {
   # declare -g "$1"="$2" # not working in older bash 3 on mac
   eval $1=\$2
-  [[ ! $BUILD_VARS == *" $1 "* ]] && BUILD_VARS+="$1 "
+  addBuildVars $1
+}
+
+# sets the variable if its not already set and tracks its name in BUILD_VARS
+# args $1 - the variable name
+# args $2 - the variable value to set
+function setVar {
+  local varName="$1"
+  # declare -g "$1"="$2" # not working in older bash 3 on mac
+  # [ ${!varName:+1} ] && echo "variable already set ${varName} = ${!varName}"
+  [[ -z ${!varName+x} ]] && eval $varName=\$2
+  addBuildVars $1
+}
+
+# add the variable name to the BUILD_VARS list for use later in make or in logging
+# args $1 - the variables
+function addBuildVars {
+  for var in "$@"; do
+    [[ ! $BUILD_VARS == *" $var "* ]] && BUILD_VARS+="$var "
+  done
 }

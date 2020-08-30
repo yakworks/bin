@@ -8,6 +8,9 @@ binDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 echo "sourcing from binDir $binDir"
 source ${binDir}/setVar
 source ${binDir}/versions
+source ${binDir}/makeEnv.sh
+source ${binDir}/docker
+source ${binDir}/kubernetes
 source ${binDir}/yaml
 source ${binDir}/git_tools
 source ${binDir}/publish
@@ -21,6 +24,39 @@ setVersion $version
 # dummy function so that this can through first and clone the git yakworks/bin
 function init {
   echo "init"
+}
+
+# create env file from BUILD_VARS for importing into makefile.
+# arg $1 - the file to use
+function createEnvFile {
+  echo "# ----- Generated from build.sh --------" > $1
+  for varName in $BUILD_VARS; do
+      val=${!varName}
+      echo "$varName=$val" >> $1
+  done
+  echo "BUILD_VARS=$BUILD_VARS" >> $1
+  echo "created $1"
+}
+
+# set build environment
+# arg $1 - BUILD_ENV (test, dev, seed)
+# arg $2 - DBMS Vendor (sqlserver,mysql, etc)
+function initEnv {
+  setVar BUILD_ENV ${1:-test}
+  setDbEnv $2
+  # build and env vars
+  setVar DB_NAME rcm_9ci_${BUILD_ENV}
+  : ${DOCK_BUILDER_NAME:="${PROJECT_NAME}-builder"}
+  setVar DOCK_BUILDER_NAME "$DOCK_BUILDER_NAME"
+}
+
+# create build/make_env_db.env for importing into makefile.
+# arg $1 - the env
+# arg $2 - the db
+function makeEnvFile {
+  initEnv $1 $2
+  mkdir -p build/make
+  createEnvFile "build/make/${BUILD_ENV}_${DBMS}.env"
 }
 
 # sets up defaults vars for docker ninedb and dock builders
@@ -74,18 +110,6 @@ function setDbEnv {
   if [ "$USE_DOCK_BUILDER" = "true" ] || [ -f /.dockerenv ] && [ "$CI" != "true" ]; then
     setVar DB_HOST "${DOCK_DB_BUILD_NAME}"
   fi
-}
-
-# create env file from BUILD_VARS for importing into makefile.
-# arg $1 - the file to use
-function createEnvFile {
-  echo "# ----- Generated from build.sh --------" > $1
-  for varName in $BUILD_VARS; do
-      val=${!varName}
-      echo "$varName=$val" >> $1
-  done
-  echo "BUILD_VARS=$BUILD_VARS" >> $1
-  echo "created $1"
 }
 
 # just spins through the BUILD_VARS and creates a sed replace in the form
