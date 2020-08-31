@@ -14,7 +14,7 @@ builder-network: # run `docker network create builder` to make sure network ther
 	@${build.sh} dockerNetworkCreate "builder-net"
 
 builder-shell: builder-start ## opens up a shell into the jdk-builder docker
-	$(DockerShellExec) ${DOCK_BUILDER_NAME} bash -l
+	$(DockerShellExec) bash -l
 
 builder-remove: ## stops and removes the jdk-builder docker
 	@${build.sh} dockerRemove ${DOCK_BUILDER_NAME}
