@@ -3,7 +3,7 @@
 # -------------
 
 # --- docker builder ---
-.PHONY: builder-start builder-shell builder-remove
+.PHONY: builder-start builder-shell builder-remove start-builder start-db
 
 # putting @ in front of command hides it from being echoed by make
 # bash ifs have to be one line, as a reminder \ continues the line and need to end each command with a ;
@@ -20,7 +20,10 @@ builder-remove: ## stops and removes the jdk-builder docker
 	@${build.sh} dockerRemove ${DOCK_BUILDER_NAME}
 	@docker network rm builder-net || true
 
-start-if-builder: ## calls db-start if USE_DOCKER_DB_BUILDER=true and builder-start if USE_BUILDER=true
+start-builder: ## calls db-start if USE_DOCKER_DB_BUILDER=true and builder-start if USE_BUILDER=true
 	@if [ "${USE_BUILDER}" == "true" ]; then \
 	  $(MAKE) ${DBMS} builder-start; \
 	fi;
+
+# this is just a placeholder for other tasks that might depend on it when using the db version of this
+start-db:

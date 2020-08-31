@@ -3,7 +3,7 @@
 # -------------
 
 # --- docker builder ---
-.PHONY: builder-start builder-shell builder-remove start-if-builder
+.PHONY: builder-start builder-shell builder-remove start-builder
 
 # putting @ in front of command hides it from being echoed by make
 # bash ifs have to be one line, as a reminder \ continues the line and need to end each command with a ;
@@ -20,12 +20,9 @@ builder-remove: ## stops and removes the jdk-builder docker
 	@${build.sh} dockerRemove ${DOCK_BUILDER_NAME}
 	@docker network rm builder-net || true
 
-start-if-builder: ## calls db-start if USE_DOCKER_DB_BUILDER=true and builder-start if USE_BUILDER=true
+start-builder: ## calls db-start if USE_DOCKER_DB_BUILDER=true and builder-start if USE_BUILDER=true
 	@if [ "${USE_BUILDER}" == "true" ]; then \
 	  $(MAKE) ${DBMS} builder-start; \
-	fi;
-	@if [ "${USE_DOCKER_DB_BUILDER}" == "true" ]; then \
-	  $(MAKE) ${DBMS} db-start; \
 	fi;
 
 #----- DB targets -------
@@ -40,6 +37,10 @@ db-wait: # runs a wait-for script that blocks until db mysql or sqlcmd succeeds
 db-down: ## stop and remove the docker DOCK_DB_BUILD_NAME
 	@${build.sh} dockerRemove ${DOCK_DB_BUILD_NAME}
 
+start-db: ## calls db-start if USE_DB_BUILDER=true and builder-start if USE_BUILDER=true
+	@if [ "${USE_DOCKER_DB_BUILDER}" == "true" ]; then \
+	  $(MAKE) ${DBMS} db-start; \
+	fi;
 #----- clean up-------
 docker-remove-all: builder-remove ## runs `make db-down` for sqlserver and mysql and
 	$(MAKE) mysql db-down

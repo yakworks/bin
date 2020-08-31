@@ -6,7 +6,7 @@
 # !DEPRECATED use all.sh
 # ---
 binDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-echo "sourcing from binDir $binDir"
+# echo "sourcing from binDir $binDir"
 source ${binDir}/setVar
 source ${binDir}/versions
 source ${binDir}/yaml
