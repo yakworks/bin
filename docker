@@ -26,7 +26,7 @@ function dockerRemove {
 function dockerStart {
   if [ ! "$(docker ps -q -f name=${1})" ]; then
     # just in case it does exist but with status=exited fire a remove
-    remove_docker ${1}
+    dockerRemove ${1}
 		docker run --name=${1} ${@:2}
   fi
 }
@@ -38,7 +38,7 @@ function dockerStart {
 # arg $2 - the docker url, defaults to yakworks/alpine-java:jdk8-builder
 function builderStart {
   durl=${2:-"yakworks/alpine-java:jdk8-builder"}
-  start $1 -it \
+  dockerStart $1 -it \
     -p 8080:8080 \
 	  -v `pwd`:/project -w /project \
 		-v ~/.gradle-docker/:/root/.gradle/ \
@@ -64,7 +64,7 @@ function dockerNetworkCreate {
 # example: dock db_start mysql-ndb mysql:5.7 13306:3306 MYSQL_ROOT_PASSWORD=123Foo
 function db_start {
   # ACCEPT_EULA is for sql server, just an env var so won't matter that its set for others
-  start $1 \
+  dockerStart $1 \
     --network builder-net \
     -v `pwd`:/project -w /project \
     -e ACCEPT_EULA=Y \

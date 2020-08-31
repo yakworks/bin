@@ -1,6 +1,21 @@
 #!/bin/bash
 
-# sets the variable even if its already set
+# sets the variable value if its not already set and adds it for tracking in BUILD_VARS
+# args $1 - the variable name
+# args $2 - the variable value to set
+function setVar {
+  varName="$1"
+  # varVal="$2"
+  # curVal="${!varName}"
+  # [[ ! ${!varName+x} ]]
+  if [[ -z ${!varName} ]]; then
+    # echo "curVal is empty, adding"
+    eval "$varName=\"\$2\""
+  fi
+  addBuildVars $varName
+}
+
+# sets the variable value and overwrites what was there before
 # args $1 - the variable name
 # args $2 - the variable value to set
 function putVar {
@@ -9,21 +24,13 @@ function putVar {
   addBuildVars $1
 }
 
-# sets the variable if its not already set and tracks its name in BUILD_VARS
-# args $1 - the variable name
-# args $2 - the variable value to set
-function setVar {
-  local varName="$1"
-  # declare -g "$1"="$2" # not working in older bash 3 on mac
-  # [ ${!varName:+1} ] && echo "variable already set ${varName} = ${!varName}"
-  [[ -z ${!varName+x} ]] && eval $varName=\$2
-  addBuildVars $1
-}
-
 # add the variable name to the BUILD_VARS list for use later in make or in logging
 # args $1 - the variables
 function addBuildVars {
-  for var in "$@"; do
-    [[ ! $BUILD_VARS == *" $var "* ]] && BUILD_VARS+="$var "
+  for bvar in "$@"; do
+    if [[ ! $BUILD_VARS == *" $bvar "* ]]; then
+      # echo "adding $bvar to BUILD_VARS"
+      BUILD_VARS+="$bvar "
+    fi
   done
 }

@@ -22,7 +22,7 @@ function initEnv {
   [ "$3" = true ] && USE_DOCKER_BUILDER=true
   # build and env vars
   setVar DB_NAME rcm_9ci_${BUILD_ENV}
-  setVar DOCK_BUILDER_NAME "${PROJECT_NAME}-builder"}
+  setVar DOCK_BUILDER_NAME "${PROJECT_NAME}-builder"
 }
 
 # create env file from BUILD_VARS for importing into makefile.
@@ -44,7 +44,7 @@ function setupDockerBuilder {
 
   # Default builders to true if not already set
   setVar USE_DOCKER_BUILDER true
-  setVar USE_DOCK_DB_BUILDER true
+  setVar USE_DOCKER_DB_BUILDER true
   # if /.dockerenv this is inside a docker (such as circleCI) already
   # then we don't want to run docker in dockers, so force to false
   if [ -f /.dockerenv ] || [ "$CI" == "true" ]; then
@@ -52,8 +52,8 @@ function setupDockerBuilder {
     USE_DOCKER_DB_BUILDER=false
   fi
 
-  # if USE_DOCK_BUILDER then set DockerExec which is what make will try and use
-  if [ "$USE_DOCK_BUILDER" = true ]; then
+  # if USE_DOCKER_BUILDER then set DockerExec which is what make will try and use
+  if [ "$USE_DOCKER_BUILDER" = true ]; then
     setVar DockerExec "docker exec ${DOCK_BUILDER_NAME}"
   fi
   setVar DockerShellExec "docker exec -it ${DOCK_BUILDER_NAME}"
@@ -81,11 +81,11 @@ function setDbEnv {
     PASS_VAR_NAME="SA_PASSWORD"
     DB_PORT=1433
   fi
-  if [ "$USE_DOCK_DB_BUILDER" = "true" ]; then
+  if [ "$USE_DOCKER_DB_BUILDER" = "true" ]; then
     setVar DockerDbExec "docker exec ${DOCK_DB_BUILD_NAME}"
   fi
   # if we are inside the docker builder but not in circleCI force the DB_HOST
-  if [ "$USE_DOCK_BUILDER" = "true" ] || [ -f /.dockerenv ] && [ "$CI" != "true" ]; then
+  if [ "$USE_DOCKER_BUILDER" = "true" ] || [ -f /.dockerenv ] && [ "$CI" != "true" ]; then
     setVar DB_HOST "${DOCK_DB_BUILD_NAME}"
   fi
 }
