@@ -1,10 +1,9 @@
 # ---
-# commons base helpers and functions for build.sh, expects a BUILD_VARS to be populated when functions called
-# meant to be imported like so
+# collects all functions for build.sh, meant to be imported like so ...
 # [ ! -e build/bin ] && git clone https://github.com/yakworks/bin.git build/bin --single-branch --depth 1
-# source build/bin/build_functions.sh
-# !DEPRECATED use all.sh
+# source build/bin/all.sh
 # ---
+
 binDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 echo "sourcing from binDir $binDir"
 source ${binDir}/setVar
@@ -21,11 +20,6 @@ source ${binDir}/docmark
 # source the version.properties
 source version.properties
 setVersion $version
-
-# dummy function so that this can through first and clone the git yakworks/bin
-function init {
-  echo "init"
-}
 
 # just spins through the BUILD_VARS and creates a sed replace in the form
 # s|\${$SOME_VAR}|the value|g;
