@@ -4,20 +4,18 @@
 # uses the variables set from gradle/build.yml
 # ------------------
 
-ghPagesDir=build/gh-pages
+GH_PAGES_DIR=build/gh-pages
 
 # initialize variables for github
 # arg $1 - the github_fullName in the format of owner/repo
 function initGithubVars {
-  # use github_fullName which comes from build.yml
-  local repoSlug=${1:-$github_fullName}
-  if [ -z "$repoSlug" ]; then
-    echo "repo slug not passed in, trying `git config --get remote.origin.url`"
-    repoSlug=$(git config --get remote.origin.url | cut -d/ -f5 | cut -d. -f1)
+  if [ -z "$GITHUB_FULLNAME" ]; then
+    echo "GITHUB_FULLNAME not set, trying `git config --get remote.origin.url`"
+    GITHUB_FULLNAME=$(git config --get remote.origin.url | cut -d/ -f5 | cut -d. -f1)
+    # if it didn't get it then error
+    [ -z "$GITHUB_FULLNAME" ] && echo "GITHUB_FULLNAME did not get setup" && return 1
   fi
-  GITHUB_FULLNAME=${repoSlug:-UNKNOWN}
   echo "initGithubVars with GITHUB_FULLNAME $GITHUB_FULLNAME"
-  # GITHUB_FULLNAME="$GITHUB_OWNER/$GITHUB_REPO"
   GITHUB_LINK_URL="https://github.com/${GITHUB_FULLNAME}"
   GITHUB_BASE_URL="github.com/${GITHUB_FULLNAME}.git"
   GITHUB_URL="https://$GITHUB_BASE_URL"
@@ -42,15 +40,15 @@ function initGithubVars {
 function clone_gh_pages {
   [ "$GITHUB_URL" ] || initGithubVars
   mkdir -p build
-  rm -rf $ghPagesDir
+  rm -rf $GH_PAGES_DIR
   git clone $GITHUB_URL build/gh-pages -b gh-pages --single-branch --depth 1
 }
 
 # in build/gh-pages commits and pushes gh pages
 function push_gh_pages {
-  git -C $ghPagesDir add -A .
-  git -C $ghPagesDir commit -a -m "CI Docs published [skip ci]" || true
-  git -C $ghPagesDir push -q $GITHUB_URL gh-pages || true
+  git -C $GH_PAGES_DIR add -A .
+  git -C $GH_PAGES_DIR commit -a -m "CI Docs published [skip ci]" || true
+  git -C $GH_PAGES_DIR push -q $GITHUB_URL gh-pages || true
 }
 
 # sets up thee git user info for commit and push
