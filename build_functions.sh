@@ -9,9 +9,6 @@ binDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 echo "sourcing from binDir $binDir"
 source ${binDir}/setVar
 source ${binDir}/versions
-source ${binDir}/makeEnv.sh
-source ${binDir}/docker
-source ${binDir}/kubernetes
 source ${binDir}/yaml
 source ${binDir}/git_tools
 source ${binDir}/publish
