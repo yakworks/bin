@@ -3,7 +3,10 @@
 # -------------
 
 # --- docker builder ---
-.PHONY: compile check
+.PHONY: clean compile check unit-test int-test boot-run
+
+clean: ## cleans build dir
+	${DockerExec} ./gradlew clean
 
 compile: start-if-builder ## runs compile in build.sh that compiles all tests as well
 	${DockerExec} ./gradlew classes

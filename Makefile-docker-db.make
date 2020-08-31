@@ -18,6 +18,7 @@ builder-shell: builder-start ## opens up a shell into the jdk-builder docker
 
 builder-remove: ## stops and removes the jdk-builder docker
 	@${build.sh} dockerRemove ${DOCK_BUILDER_NAME}
+  @docker network rm builder-net || true
 
 start-if-builder: ## calls db-start if USE_DOCKER_DB_BUILDER=true and builder-start if USE_BUILDER=true
 	@if [ "${USE_BUILDER}" == "true" ]; then \
@@ -39,3 +40,7 @@ db-wait: # runs a wait-for script that blocks until db mysql or sqlcmd succeeds
 db-down: ## stop and remove the docker DOCK_DB_BUILD_NAME
 	@${build.sh} dockerRemove ${DOCK_DB_BUILD_NAME}
 
+#----- clean up-------
+docker-remove-all: builder-remove ## runs `make db-down` for sqlserver and mysql and
+	$(MAKE) mysql db-down
+	$(MAKE) sqlserver db-down
