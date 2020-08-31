@@ -18,7 +18,6 @@ function setVersion {
   local dotCount=$(echo "${VERSION}" | awk -F"." '{print NF-1}')
   # cuts to the last dot
 	local baseVersion=$(echo $VERSION | cut -d. -f1-$dotCount)
-  # ${version%.*} returns the version from source version.properties without last dot so we can add the .x
   setVar VERSIONX "$baseVersion.x"
   setVar NINEDB_VERSION "$VERSIONX"
   #replace dots with - so 10.0.x turns into v10-0-x. kubernetes can't have dots in names

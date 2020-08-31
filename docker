@@ -1,19 +1,18 @@
 #!/bin/bash
 # ---
 # Common helper functions for running docker images and logging into dockerhub
-# !DEPRECATED use docker
 # ---
 
 # docker login
 # arg $1 - docker hub user
 # arg $2 - docker hub password
-function hub_login {
+function hubLogin {
   echo "$2" | docker login -u "$1" --password-stdin
 }
 
 # removes the docker
 # arg $1 - the docker name
-function remove_docker {
+function dockerRemove {
   if [ "$(docker ps -aq -f name=${1})" ]; then
     # echo "if this following shows errors 'No such container:' next its fine as its doing a force rm"
     docker stop ${1} || true && docker rm ${1} || true
@@ -24,10 +23,10 @@ function remove_docker {
 # starts a docker (docker run) if its not already running
 # arg $1 - the name of the docker as in --name=${1}
 # arg $2 - the arguments that would normall passed to a docker run
-function start {
+function dockerStart {
   if [ ! "$(docker ps -q -f name=${1})" ]; then
     # just in case it does exist but with status=exited fire a remove
-    remove_docker ${1}
+    dockerRemove ${1}
 		docker run --name=${1} ${@:2}
   fi
 }
@@ -37,9 +36,9 @@ function start {
 # maps port 8080 in case running tomcat server
 # arg $1 - name of the docker
 # arg $2 - the docker url, defaults to yakworks/alpine-java:jdk8-builder
-function builder_start {
-  durl=${2:-"yakworks/alpine-java:jdk8-builder"}
-  start $1 -it \
+function builderStart {
+  durl=${2:-"yakworks/alpine-jdk:builder8"}
+  dockerStart $1 -it \
     -p 8080:8080 \
 	  -v `pwd`:/project -w /project \
 		-v ~/.gradle-docker/:/root/.gradle/ \
@@ -50,7 +49,7 @@ function builder_start {
 # -----------------------------------
 # create a docker network if it does not exist
 # arg $1 - network name
-function network_create {
+function dockerNetworkCreate {
   if [ ! "$(docker network ls | grep $1)" ]; then \
 	  docker network create $1; \
 	fi
@@ -65,7 +64,7 @@ function network_create {
 # example: dock db_start mysql-ndb mysql:5.7 13306:3306 MYSQL_ROOT_PASSWORD=123Foo
 function db_start {
   # ACCEPT_EULA is for sql server, just an env var so won't matter that its set for others
-  start $1 \
+  dockerStart $1 \
     --network builder-net \
     -v `pwd`:/project -w /project \
     -e ACCEPT_EULA=Y \

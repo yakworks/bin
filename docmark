@@ -1,6 +1,6 @@
 #!/bin/bash
 # -----------------
-# functions for running mkdocs
+# functions for running the yakworks docmark mkdocs variant
 # depends on bin/github_pages script
 # ------------------
 

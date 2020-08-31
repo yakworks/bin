@@ -1,9 +1,9 @@
+# -------------
+# Helper tasks to
+# -------------
+
 # --- docker builder ---
 .PHONY: dockerhub-login kube-config kube-create-ns kube-port-forward
-
-# gotta have double $$ to pass it from make to the bash
-dockerhub-login: ## login to docker hub using whats in the env vars $DOCKERHUB_USER $DOCKERHUB_PASSWORD
-	echo "$$DOCKERHUB_PASSWORD" | docker login -u "$$DOCKERHUB_USER" --password-stdin
 
 # ----- kubernetes ------
 kube-config: ## creates kubectl config assumes $K8_USER $K8_TOKEN env vars are setup
@@ -16,7 +16,7 @@ kube-port-forward: ## runs kubectl port-forward to the ${KUB_DB_SERVICE_NAME}
 	kubectl port-forward --namespace=${KUB_NAMESPACE} --address 0.0.0.0 service/${KUB_DB_SERVICE_NAME} 1${DB_PORT}:${DB_PORT}
 
 version: ## Prints the BUILD_VERSION which will be released
-	@echo $(VERSION)
+	@echo $(BUILD_VERSION)
 
 update-version: #updates version in version.properties
 	@${build.sh} updateVersionProps ${VERSION}
