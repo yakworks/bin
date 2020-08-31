@@ -22,12 +22,12 @@ else ifeq (h2,$(filter h2,${MAKECMDGOALS}))
 endif
 
 # ----- if use-docker then force docker builder
-ifeq (docker-builder,$(filter docker-builder,${MAKECMDGOALS}))
-  IS_DOCKER_BUILDER = true
+ifeq (use-builder,$(filter use-builder,${MAKECMDGOALS}))
+  USE_BUILDER = true
 endif
 
 # dummy targets so we dont get the make[1]: Nothing to be done for `xxx'.
-dummy_targets = dev seed test-env mysql sqlserver oracle h2 use-docker
+dummy_targets = dev seed test-env mysql sqlserver oracle h2 use-builder
 .PHONY: $(dummy_targets)
 $(dummy_targets):
 	@:

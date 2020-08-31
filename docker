@@ -37,7 +37,7 @@ function dockerStart {
 # arg $1 - name of the docker
 # arg $2 - the docker url, defaults to yakworks/alpine-java:jdk8-builder
 function builderStart {
-  durl=${2:-"yakworks/alpine-java:jdk8-builder"}
+  durl=${2:-"yakworks/alpine-jdk:builder8"}
   dockerStart $1 -it \
     -p 8080:8080 \
 	  -v `pwd`:/project -w /project \
