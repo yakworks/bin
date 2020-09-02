@@ -21,6 +21,17 @@ source ${binDir}/docmark
 source version.properties
 setVersion $version
 
+# initialize from build.yml
+# arg $1 - the file
+function init_from_build_yml {
+  create_yml_variables $1
+  setVar RELEASABLE_BRANCHES "$git_releasableBranchRegex"
+  setVar GITHUB_FULLNAME "$github_fullName"
+  setVar CHANGELOG_NAME "$releaseNotes_file"
+  # keeps whats after last /
+  setVar PROJECT_NAME ${GITHUB_FULLNAME##*/}
+}
+
 # just spins through the BUILD_VARS and creates a sed replace in the form
 # s|\${$SOME_VAR}|the value|g;
 function buildSedArgs {

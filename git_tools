@@ -16,6 +16,8 @@ function initGithubVars {
     [ -z "$GITHUB_FULLNAME" ] && echo "GITHUB_FULLNAME did not get setup" && return 1
   fi
   echo "initGithubVars with GITHUB_FULLNAME $GITHUB_FULLNAME"
+  # keeps whats after last /
+  GITHUB_REPO=${GITHUB_FULLNAME##*/}
   GITHUB_LINK_URL="https://github.com/${GITHUB_FULLNAME}"
   GITHUB_BASE_URL="github.com/${GITHUB_FULLNAME}.git"
   GITHUB_URL="https://$GITHUB_BASE_URL"
