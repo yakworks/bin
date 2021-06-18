@@ -4,7 +4,8 @@
 # uses the variables set from gradle/build.yml
 # ------------------
 
-GH_PAGES_DIR=build/gh-pages
+: "${GH_PAGES_DIR:=build/gh-pages}"
+: "${GH_PAGES_BRANCH:=gh-pages}"
 
 # initialize variables for github
 # arg $1 - the github_fullName in the format of owner/repo
@@ -43,14 +44,14 @@ function clone_gh_pages {
   [ "$GITHUB_URL" ] || initGithubVars
   mkdir -p build
   rm -rf $GH_PAGES_DIR
-  git clone $GITHUB_URL build/gh-pages -b gh-pages --single-branch --depth 1
+  git clone $GITHUB_URL $GH_PAGES_DIR -b $GH_PAGES_BRANCH --single-branch --depth 1
 }
 
 # in build/gh-pages commits and pushes gh pages
 function push_gh_pages {
   git -C $GH_PAGES_DIR add -A .
   git -C $GH_PAGES_DIR commit -a -m "CI Docs published [skip ci]" || true
-  git -C $GH_PAGES_DIR push -q $GITHUB_URL gh-pages || true
+  git -C $GH_PAGES_DIR push -q $GITHUB_URL $GH_PAGES_BRANCH || true
 }
 
 # sets up thee git user info for commit and push
@@ -72,9 +73,9 @@ function init_gh_pages {
   mkdir -p build
   cd build
   rm -rf gh-pages
-  git clone $GITHUB_URL gh-pages
+  git clone $GITHUB_URL $GH_PAGES_BRANCH
   cd gh-pages
-  git checkout --orphan gh-pages
+  git checkout --orphan $GH_PAGES_BRANCH
   git rm -rf .
   echo "github pages site" > README.md
   push_gh_pages
