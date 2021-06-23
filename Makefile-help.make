@@ -2,6 +2,9 @@
 log-vars: ## logs the BUILD_VARS in the build/make env
 	$(foreach v, $(sort $(BUILD_VARS)), $(info $(v) = $($(v))))
 
+build-log-vars: start-if-builder ## calls the build.sh logVars to sanity check
+	${DockerExec} ${build.sh} logVars
+
 print-%: ## echos the variable value
 	@echo '$*=$($*)'
 

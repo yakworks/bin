@@ -36,13 +36,15 @@ function init_from_build_yml {
 # s|\${$SOME_VAR}|the value|g;
 function buildSedArgs {
   for varName in $BUILD_VARS; do
-    BUILD_VARS_SED_ARGS+="s|\\\${$varName}|${!varName}|g; "
+    ESCAPED_VarName=$(printf '%s\n' "${!varName}" | sed -e 's/[\|&]/\\&/g')
+    BUILD_VARS_SED_ARGS+="s|\\\${$varName}|$ESCAPED_VarName|g; "
   done
+  # echo "$BUILD_VARS_SED_ARGS"
 }
 
 # runs sed on the kubernetes tpl.yml template files to update and replace variables with values
-# arg $1 the tpl.yml file
-# arg $2 the dir for sed to put the processed file
+# $1 - the tpl.yml file
+# $2 - the dir for sed to put the processed file
 # echos out the processed tpl build file location
 function sedTplYml {
   buildSedArgs

@@ -42,10 +42,10 @@ start-db: ## calls db-start if USE_DB_BUILDER=true and builder-start if USE_BUIL
 	  $(MAKE) ${DBMS} db-start; \
 	fi;
 
-db-restart: db-down
+db-restart: db-down ## restart the db
 	$(MAKE) ${DBMS} db-start
 
-restart-db: db-restart ## restart the db
+restart-db: db-restart ## alias to db-restart, restarts the db
 
 db-pull: db-down ## pulls latest nine-db from dock9 docker hub
 	docker pull ${DOCKER_DB_URL}
