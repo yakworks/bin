@@ -23,6 +23,7 @@ function initEnv {
   # build and env vars
   setVar DB_NAME rcm_9ci_${BUILD_ENV}
   setupDockerExecs
+  postInitEnv
 }
 
 # create env file from BUILD_VARS for importing into makefile.

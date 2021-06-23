@@ -6,6 +6,9 @@
 .PHONY: dockerhub-login kube-config kube-create-ns kube-port-forward
 
 # ----- kubernetes ------
+kube-clean: ## removes everything with the app=${APP_NAME} under ${KUB_NAMESPACE}
+	${kube.sh} clean "app=${APP_NAME}" ${KUB_NAMESPACE}
+
 kube-config: ## creates kubectl config assumes $K8_USER $K8_TOKEN env vars are setup
 	$(kube.sh) config ${KUB_SERVER} $$K8_USER $$K8_TOKEN ranch-dev
 

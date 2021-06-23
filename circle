@@ -5,6 +5,17 @@
 # ---
 set -e
 
+# ---
+# triggers or invoke a circle pipleline. CIRCLE_TOKEN env variable should be setup
+# arg $1 - the repo slug, for example 'yakworks/gorm-tools' to call the build for that one
+# --
+function trigger-circle {
+  curl --location --request POST \
+    "https://circleci.com/api/v2/project/github/${1}/pipeline" \
+    --header 'Content-Type: application/json' \
+    -u "${CIRCLE_TOKEN}:"
+}
+
 # initialize circle variables
 function ciInitVars {
   echo "ciInitVars"

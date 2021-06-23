@@ -30,7 +30,7 @@ Note: Version must be properly formatted as a semantic version string
 
 Note: `./semver bump pre-release` will work only if the version has pre release part, eg `10.0.0-RC.2`
 
-**`build_functions.sh`** helpers
+**`all.sh`** helpers
 
 | command  | output | Note |
 | ------------- | ------------- |----- |
@@ -41,7 +41,7 @@ Note: `./semver bump pre-release` will work only if the version has pre release 
 **Example**
 
 ```bash
-source ./build_functions.sh
+source ./all.sh
 incrementVersion patch 10.0.0 #Will output 10.0.1
 updateVersionProps 10.0.11 #Will update version.properties with version=10.0.11
 ```
@@ -59,6 +59,9 @@ updateVersionProps 10.0.11 #Will update version.properties with version=10.0.11
 `Makefile.deploy-common-targets` must have been included in the main make file of the target project
 eg. `include /PATH-TO/Makefile.deploy-common-targets`
 
+
+# TODO
+Want to start using this to bring some standardization to the shell docs
 
 # Refs
 

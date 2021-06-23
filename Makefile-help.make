@@ -1,6 +1,6 @@
 # HELP and helpers
 log-vars: ## logs the BUILD_VARS in the build/make env
-	$(foreach v, $(BUILD_VARS), $(info $(v) = $($(v))))
+	$(foreach v, $(sort $(BUILD_VARS)), $(info $(v) = $($(v))))
 
 print-%: ## echos the variable value
 	@echo '$*=$($*)'

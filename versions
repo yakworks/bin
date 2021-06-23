@@ -1,9 +1,14 @@
 #!/bin/bash
 # ---
 # Some common helpers to work with version,
-# depends on build_functions and that should have been loaded first so it has the setVar
+# depends on setVar and that should have been loaded first so it has the setVar
 # ---
 
+# ---
+# sets the version and sets up the other useful variables for that version such as
+# VERX_NO_DOTS and the NINEDB_VERSION
+# $1 - version to use
+# ---
 function setVersion {
   # if nothing passing in the usee the lowercase version that should have come in from version.properties
   local ver=${1:-$version}
@@ -24,8 +29,10 @@ function setVersion {
   setVar VERX_NO_DOTS "v${VERSIONX//./-}"
 }
 
+# ---
 # increments version so 9.8.7 will return 9.8.8 and 9.8.7-RC.1 returns 9.8.7-RC.2
-# arg $1 - the version to bump
+# $1 - the version to bump
+# ---
 function bumpPatchLevel {
   local ver=${1:-$VERSION}
   local dotCount=$(echo "${ver}" | awk -F"." '{print NF-1}')

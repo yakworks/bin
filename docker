@@ -73,6 +73,14 @@ function db_start {
     -d $2
 }
 
+# helper to start docker db if Make is not an option. uses dev environment
+# arg $1 - optional DB, defaults to mysql
+function db-start {
+  # env doesn't matter here so just set it to dev
+  initEnv dev ${1:-mysql}
+  db_start ${DOCK_DB_BUILD_NAME} ${DOCKER_DB_URL} ${DB_PORT}:${DB_PORT} ${PASS_VAR_NAME}=${DB_PASSWORD}
+}
+
 # -----
 # meant to be run inside the mysql docker with docker exec
 # $1 - host

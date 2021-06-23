@@ -4,11 +4,13 @@
 # ------------------
 set -e
 
+# ---
 # quick and dirty templating. replaces a defined seat of tags in format ${VAR}
 # with env vaiables from the specified source file
-# arg $1 - the file to process
-# arg $2 - the env file to source
-# arg $3+ - the additional vars to pass to the env file
+# $1 - the file name to process
+# $2 - the env file to source
+# $3 - the additional vars to pass to the env file
+# ---
 function apply {
   template=$(cat "${1}" | sed -e "s/\${NAME}/$NAME/g" \
     -e "s~\${DOCKER_REPO}~$DOCKER_REPO~g" \
