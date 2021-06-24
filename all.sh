@@ -16,6 +16,7 @@ source ${binDir}/git_tools
 source ${binDir}/publish
 source ${binDir}/circle
 source ${binDir}/docmark
+source ${binDir}/utils
 
 # source the version.properties
 source version.properties
