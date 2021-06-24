@@ -27,3 +27,8 @@ start-builder: ## calls db-start if USE_DOCKER_DB_BUILDER=true and builder-start
 
 # this is just a placeholder for other tasks that might depend on it when using the db version of this
 start-db:
+
+.PHONY: dockerhub-login
+dockerhub-login: ## login to docker hub using whats in the env vars $DOCKERHUB_USER $DOCKERHUB_PASSWORD
+#   gotta have double $$ to pass it from make to the bash
+	echo "$$DOCKERHUB_PASSWORD" | docker login -u "$$DOCKERHUB_USER" --password-stdin

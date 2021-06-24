@@ -3,7 +3,7 @@
 # -------------
 
 # --- docker builder ---
-.PHONY: dockerhub-login kube-config kube-create-ns kube-port-forward
+.PHONY: kube-config kube-create-ns kube-port-forward
 
 # ----- kubernetes ------
 kube-clean: ## removes everything with the app=${APP_NAME} under ${KUB_NAMESPACE}
