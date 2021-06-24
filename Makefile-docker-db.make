@@ -25,6 +25,10 @@ start-builder: ## calls db-start if USE_DOCKER_DB_BUILDER=true and builder-start
 	  $(MAKE) ${DBMS} builder-start; \
 	fi;
 
+.PHONY: dockerhub-login
+dockerhub-login: ## login to docker hub using whats in the env vars $DOCKERHUB_USER $DOCKERHUB_PASSWORD
+	echo "$$DOCKERHUB_PASSWORD" | docker login -u "$$DOCKERHUB_USER" --password-stdin
+
 #----- DB targets -------
 .PHONY: db-start db-wait db-down
 
