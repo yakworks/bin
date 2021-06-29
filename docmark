@@ -40,6 +40,7 @@ function docmark_publish {
 }
 
 function publishDocs {
+  echo "Running docmark.publishDocs ...."
   docmark_build
   copyGroovydocToApi
   docmark_publish

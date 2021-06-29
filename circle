@@ -49,10 +49,9 @@ function trigger-circle {
 }
 
 # publish the docmark docs
-function ciPublishDocs {
+function ci-publish-docs {
   IS_RELEASABLE_BRANCH=$(isReleasableBranch "$CIRCLE_BRANCH")
   if [[ $IS_RELEASABLE_BRANCH ]]; then
-    echo "IS_RELEASABLE_BRANCH:true ... calling docmark.publishDocs"
     publishDocs
   fi
 }
