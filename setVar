@@ -24,6 +24,7 @@ function putVar {
   addBuildVars $1
 }
 
+
 # add the variable name to the BUILD_VARS list for use later in make or in logging
 # args $1 - the variables
 function addBuildVars {
@@ -32,5 +33,12 @@ function addBuildVars {
       # echo "adding $bvar to BUILD_VARS"
       BUILD_VARS+="$bvar "
     fi
+  done
+}
+
+# helper/debug function to log out the build_vars
+function logVars {
+  for varName in $BUILD_VARS; do
+    echo "$varName = ${!varName}"
   done
 }

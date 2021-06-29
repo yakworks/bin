@@ -1,54 +1,73 @@
 #!/bin/bash
 # ---
-# common logic for publishing a release to either snapshot maven and bintray
+# common logic for publishing a release.
 # ---
 
+
+# ---
+# checks if the passed in branch matches whats in the RELEASABLE_BRANCHES var
+# $1 - the branch name
+# returns the branch name if it matches, empty if not
+# ---
+function isReleasableBranch {
+  # for testing uncomment
+  # CIRCLE_BRANCH="release/10"
+
+  # set defaults for RELEASABLE_BRANCHES if not set
+  : ${RELEASABLE_BRANCHES:="master|release/.+"}
+  # wraps in the ^(..)$ so it only matches full word not partials
+  local grepRegex="^(${RELEASABLE_BRANCHES})$"
+  matchReleaseBranch $1 $grepRegex
+}
+
+# ---
 # checks if the passed in branch name matches the regex for releasable
-# arg $1 - the current branch name
-# arg $2 - the releasableBranchRegex
+# $1 - the current branch name
+# $2 - the releasableBranchRegex
+# returns the branch name if it matches, empty if not
+# ---
 function matchReleaseBranch {
   echo "$1" | grep -E "$2" || true
 }
 
-# this cane be overriden in the build.sh
-function publishLib {
-  if [ "$snapshot" == "false" ]; then
-    publishRelease
-  else
-    publishSnapshot
-  fi
+# ---
+# checks a commit rangs to see if somethign other than docs has changed
+# $1 - the commit range like 911ff1ea1fa5...a883787c2f50
+# returns the list of file changes, empty if nothing
+# ---
+function hasAppChanges {
+  git diff $1 --name-status | grep -v -E "(README\.md|mkdocs\.yml|docs/)" || true
 }
 
-# this can be overriden in the build.sh
-function publishSnapshot {
-  echo "---- publishing SNAPSHOT ----"
-  ./gradlew publish
+# ---
+# checks a commit rangs to see if docs have changed
+# $1 - the commit range like 911ff1ea1fa5...a883787c2f50
+# returns the list of file changes, empty if nothing
+# ---
+function hasDocChanges {
+  git diff $1 --name-status | grep -E "(README\.md|mkdocs\.yml|version.properties|docs/)" || true
 }
 
-# this can be overriden in the build.sh
-function publishRelease {
-  echo "---- publishing RELEASE ----"
-  if [ "$bintray_enabled" == "true" ]; then
-    ./gradlew bintrayUpload
-  else
-    ./gradlew publish
-  fi
-}
-
+# ---
 # bumps version, updates change log, tags and pushes
-# arg $1 - the CI or release branch to push to, should be the active git branch that is checked out
+# $1 - the CI or release branch to push to, should be the active git branch that is checked out
+# ---
 function releaseFiles {
   echo "snapshot:false ... doing release process for version bump"
   echo "---- update the changelog ----"
+  # git_tools
   updateChangelog $VERSION $publishedVersion $CHANGELOG_NAME
 
   echo "update version in README"
+  # versions
   replaceVersionInFile README.md
 
   echo "---- increment the version.properties ----"
+  # versions
   bumpVersionFile
 
   echo "---- add ver, RM and changelog files ----"
+  # git_tools
   [ "$GITHUB_URL" ] || initGithubVars
   git add README.md version.properties $CHANGELOG_NAME
   git commit -m "$VERSION release, changelog, version [ci skip]"

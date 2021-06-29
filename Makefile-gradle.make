@@ -1,8 +1,4 @@
-# -------------
-# Helper tasks to start and connect dockers for dev and building
-# -------------
 
-# --- docker builder ---
 .PHONY: clean compile check unit-test int-test boot-run
 
 clean: ## cleans build dir
@@ -11,7 +7,7 @@ clean: ## cleans build dir
 compile: start-builder ## runs compile in build.sh that compiles all tests as well
 	${DockerExec} ./gradlew classes
 
-check: start-builder start-db ## runs gradlew check
+check: start-builder ## runs ./gradlew check
 	${DockerExec} ./gradlew check
 
 testArg := $(if $(tests),--tests $(tests), )

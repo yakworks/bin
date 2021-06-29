@@ -3,10 +3,12 @@
 # Common helper functions for running docker images and logging into dockerhub
 # ---
 
-# docker login
-# arg $1 - docker hub user
-# arg $2 - docker hub password
-function hubLogin {
+# ---
+# login to docker hub
+# $1 - docker hub user
+# $2 - docker hub password
+# ---
+function docker-login {
   echo "$2" | docker login -u "$1" --password-stdin
 }
 
