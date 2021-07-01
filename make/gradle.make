@@ -4,45 +4,43 @@
 # -------------
 circle.sh := $(BUILD_BIN)/circle
 
-.PHONY: cache-key-file resolve-dependencies lint check clean compile unit-test int-test boot-run
+.PHONY: cache-key-file resolve-dependencies
 
 ## generates the cache-key.tmp for CI to checksum. depends on GRADLE_PROJECTS var
 cache-key-file: | _verify_GRADLE_PROJECTS
 	@$(circle.sh) cache-key-file "$(GRADLE_PROJECTS)"
 
-## used on CI, calls ./gradlew resolveConfigurations to download gradle deps without a compile
+## calls `gradlew resolveConfigurations` to download deps without compiling, used mostly for CI cache
 resolve-dependencies:
 	./gradlew resolveConfigurations --no-daemon
 
 ## runs codenarc and spotless
-lint:
+lint::
 	./gradlew spotlessCheck codenarcMain
 
-## call ./gradlew check to do a full lint and test
-check:
+## Run the lint and test suite with ./gradlew check
+check::
 	./gradlew check
 
 ## gradle clean
 clean::
-	$(DockerExec) ./gradlew clean
+	./gradlew clean
 
-## runs gradle classes to compile
+## compiles with gradle classes
 compile:
-	$(DockerExec) ./gradlew classes
+	./gradlew classes
 
-## on multi-project gradles this will merges test results into one spot to store in CI build
-merge-test-results: | _verify_GRADLE_PROJECTS
+# on multi-project gradles this will merges test results into one spot to store in CI build
+merge-test-results: FORCE | _verify_GRADLE_PROJECTS
 	$(circle.sh) merge-test-results "$(GRADLE_PROJECTS)"
 
 testArg := $(if $(tests),--tests $(tests), )
 
-## runs gradle test, add tests=... to pass to gradles --tests
-unit-test:
-	$(DockerExec) ./gradlew test $(testArg)
+## unit tests with gradle test, add tests=... to pass to gradles --tests
+test-unit: FORCE
+	./gradlew test $(testArg)
 
-## runs gradle integrationTest
-int-test:
-	$(DockerExec) ./gradlew integrationTest $(testArg)
+## integration tests with gradle integrationTest
+test-int: FORCE
+	./gradlew integrationTest $(testArg)
 
-boot-run:
-	$(DockerExec) ./gradlew -DBMS=$(DBMS) -Dgrails.env=$(BUILD_ENV) bootRun

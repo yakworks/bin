@@ -6,42 +6,33 @@
 #
 # Override TPUT_PREFIX to alter the formatting.
 TPUT        := $(shell which tput 2> /dev/null)
-TPUT_PREFIX := $(TPUT) bold
+TPUT_PREFIX := $(TPUT) bold;
 TPUT_SUFFIX := $(TPUT) sgr0
-TPUT_RED    := $(TPUT) setaf 1
-TPUT_GREEN  := $(TPUT) setaf 2
-TPUT_YELLOW := $(TPUT) setaf 3
+TPUT_RED    := $(TPUT) setaf 1;
+TPUT_GREEN  := $(TPUT) setaf 2;
+TPUT_YELLOW := $(TPUT) setaf 3;
 LOG_PREFIX  ?= ===>
 
+# if not TPUT then blank out the vars
 ifeq (,$(and $(TPUT),$(TERM)))
+TPUT_PREFIX :=
+TPUT_SUFFIX :=
+TPUT_RED    :=
+TPUT_GREEN  :=
+TPUT_YELLOW :=
+endif # end tput check
 
 define _log
-	echo "$(if $(LOG_PREFIX),$(LOG_PREFIX) )$(1)"
+	@$(TPUT_PREFIX) echo "$(if $(LOG_PREFIX),$(LOG_PREFIX) )$(1)"; $(TPUT_SUFFIX)
 endef
 
 define _warn
-	echo "$(if $(LOG_PREFIX),$(LOG_PREFIX) )$(1)"
+	@$(TPUT_PREFIX) $(TPUT_YELLOW) echo "$(if $(LOG_PREFIX),$(LOG_PREFIX) )$(1)"; $(TPUT_SUFFIX)
 endef
 
 define _error
-	echo "$(if $(LOG_PREFIX),$(LOG_PREFIX) )$(1)"
+	@$(TPUT_PREFIX) $(TPUT_RED) echo "$(if $(LOG_PREFIX),$(LOG_PREFIX) )$(1)"; $(TPUT_SUFFIX)
 endef
-
-else
-
-define _log
-	@$(TPUT_PREFIX); echo "$(if $(LOG_PREFIX),$(LOG_PREFIX) )$(1)"; $(TPUT_SUFFIX)
-endef
-
-define _warn
-	@$(TPUT_PREFIX); $(TPUT_YELLOW); echo "$(if $(LOG_PREFIX),$(LOG_PREFIX) )$(1)"; $(TPUT_SUFFIX)
-endef
-
-define _error
-	@$(TPUT_PREFIX); $(TPUT_RED); echo "$(if $(LOG_PREFIX),$(LOG_PREFIX) )$(1)"; $(TPUT_SUFFIX)
-endef
-
-endif
 
 define log
 	@$(_log)
@@ -65,7 +56,7 @@ OS_CPU  := $(if $(findstring 64,$(OS_ARCH)),amd64,x86)
 endif
 
 test-logging-defs: FORCE
-	$(call log, log OS_NAME $(OS_NAME));
-	$(call _log, _log OS_ARCH $(OS_ARCH));
-	$(call _warn, _warn OS_CPU $(OS_CPU));
-	$(call _error, sample _error $(OS_CPU));
+	$(call log, log OS_NAME $(OS_NAME))
+	$(call _log, _log OS_ARCH $(OS_ARCH))
+	$(call _warn, _warn OS_CPU $(OS_CPU))
+	$(call _error, sample _error $(OS_CPU))

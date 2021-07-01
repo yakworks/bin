@@ -28,7 +28,7 @@ else ifeq (h2,$(filter h2,$(MAKECMDGOALS)))
 endif
 
 # dummy targets so we dont get the make[1]: Nothing to be done for `xxx'.
-dummy_targets = dev seed test-env mysql sqlserver oracle h2 use-builder
+dummy_targets = dev seed test-env mysql sqlserver oracle h2
 .PHONY: $(dummy_targets)
 $(dummy_targets):
 	@:

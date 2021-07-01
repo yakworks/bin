@@ -39,7 +39,7 @@ log-buildsh-vars: FORCE
 
 ## list all the functions sourced into the build.sh
 list-buildsh-functions: FORCE
-	$(DockerExec) $(build.sh) list-functions
+	$(build.sh) list-functions
 
 # Helper target for declaring an external executable as a recipe dependency.
 # For example,
@@ -58,12 +58,6 @@ _program_%: FORCE
 _verify_%: FORCE
 	@_=$(if $($*),,$(error `$*` is not defined or is empty))
 
-# The defult build dir, if we have only one it'll be easier to cleanup
-BUILD_DIR =: build
-
-$(BUILD_DIR):
-	mkdir -p $@
-
 # text manipulation helpers
 _awk_case = $(shell echo | awk '{ print $(1)("$(2)") }')
 lc = $(call _awk_case,tolower,$(1))
@@ -78,7 +72,21 @@ FORCE:
 clean::
 	@:
 
-.PHONY: clean FORCE
+## runs linter
+lint::
+	@:
+
+## Run the lint and test suites
+check::
+	@:
+
+.PHONY: clean lint check FORCE
+
+# The defult build dir, if we have only one it'll be easier to cleanup
+BUILD_DIR =: build
+# $(info BUILD_DIR=$(BUILD_DIR))
+$(BUILD_DIR):
+	mkdir -p $@
 
 # include the logging make
 include $(BUILD_BIN)/make/logging.make
