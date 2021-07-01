@@ -43,3 +43,20 @@ transform_to_java_props() {
 
   echo "$sysProps"
 }
+
+# will echo if its falsy
+# to be falsy a value could be false, "false", 0, "0", unset, empty string
+# usage:
+#   FOO=false
+#   [ $(isFalsy "$FOO") ] && echo "FOO is falsy"
+function isFalsy {
+  [ ! "$1" ] && echo "unsetOrEmpty"; [ "$1" = false ] && echo "isFalse"; [ "$1" = 0 ] && echo "is0"
+}
+
+# will echo if its not falsy
+# usage:
+#   FOO="anything not falsy"
+#   [ $(isTruthy "$FOO") ] && echo "FOO is truthy"
+function isTruthy {
+  [ ! $(isFalsy "$1") ] && echo "isTruthy"
+}
