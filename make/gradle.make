@@ -7,7 +7,7 @@ circle.sh := $(BUILD_BIN)/circle
 .PHONY: cache-key-file resolve-dependencies lint check clean compile unit-test int-test boot-run
 
 ## generates the cache-key.tmp for CI to checksum. depends on GRADLE_PROJECTS var
-cache-key-file: | _var_GRADLE_PROJECTS
+cache-key-file: | _verify_GRADLE_PROJECTS
 	@$(circle.sh) cache-key-file "$(GRADLE_PROJECTS)"
 
 ## used on CI, calls ./gradlew resolveConfigurations to download gradle deps without a compile
@@ -31,7 +31,7 @@ compile:
 	$(DockerExec) ./gradlew classes
 
 ## on multi-project gradles this will merges test results into one spot to store in CI build
-merge-test-results: | _var_GRADLE_PROJECTS
+merge-test-results: | _verify_GRADLE_PROJECTS
 	$(circle.sh) merge-test-results "$(GRADLE_PROJECTS)"
 
 testArg := $(if $(tests),--tests $(tests), )

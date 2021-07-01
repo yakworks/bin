@@ -1,16 +1,19 @@
 # The "main" utility functions and helpers useful for the common case. Most
-# ludicrous makefiles require this file, so it's sensible to `include` it first.
-# see https://github.com/basejump/ludicrous-makefiles
+# our makefiles require this file, so it's sensible to `include` it first.
+# inspired by https://github.com/basejump/ludicrous-makefiles
 
 # the dir this is in
 BUILD_BIN := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 HELP_AWK := $(BUILD_BIN)/make/help.awk
 
-## displays this message
+# see Target-specific Variable Values for above https://www.gnu.org/software/make/manual/html_node/Target_002dspecific.html
+# done so main Makefile is seperate and comes last in awk so any help comments win for main file
 help: _HELP_F := $(firstword $(MAKEFILE_LIST))
+
+## list help docs
 help: | _program_awk
-	@awk -f $(HELP_AWK) $(wordlist 2,$(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)) $(_HELP_F)  # always prefer help from the top-level makefile
+	@awk -f $(HELP_AWK) $(wordlist 2,$(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)) $(_HELP_F)
 
 .PHONY: help
 .DEFAULT_GOAL := help
@@ -19,12 +22,12 @@ help: | _program_awk
 log-vars: FORCE
 	$(foreach v, $(sort $(BUILD_VARS)), $(info $(v) = $($(v))))
 
-## calls the build.sh logVars to sanity check
-build-log-vars: FORCE
+## calls the build.sh log-vars to sanity check
+log-buildsh-vars: FORCE
 	$(build.sh) log-vars
 
-## lists the functions sourced into the build.sh
-build-list-functions: FORCE
+## list all the functions sourced into the build.sh
+list-buildsh-functions: FORCE
 	$(DockerExec) $(build.sh) list-functions
 
 # Helper target for declaring an external executable as a recipe dependency.
@@ -35,13 +38,13 @@ build-list-functions: FORCE
 _program_%: FORCE
 	@_=$(or $(shell which $* 2> /dev/null),$(error `$*` command not found. Please install `$*` and try again))
 
-# Helper target for declaring required environment variables.
+# Helper target for checking required environment variables.
 #
 # For example,
-#   `my_target`: | _var_PARAMETER`
+#   `my_target`: | _verify_FOO`
 #
-# will fail before running `my_target` if the variable `PARAMETER` is not declared.
-_var_%: FORCE
+# will fail before running `my_target` if the variable `FOO` is not declared.
+_verify_%: FORCE
 	@_=$(if $($*),,$(error `$*` is not defined or is empty))
 
 # The defult build dir, if we have only one it'll be easier to cleanup
