@@ -13,7 +13,6 @@ function setVersion {
   # if nothing passing in the usee the lowercase version that should have come in from version.properties
   local ver=${1:-$version}
   setVar VERSION "$ver"
-  setVar VERSION_TAG "v$VERSION"
   # set the BUILD_VERSION for libs to default to version
   local buildVer="$VERSION"
   # if its a snapshot then append the SNAPSHOT
@@ -24,7 +23,6 @@ function setVersion {
   # cuts to the last dot
 	local baseVersion=$(echo $VERSION | cut -d. -f1-$dotCount)
   setVar VERSIONX "$baseVersion.x"
-  setVar NINEDB_VERSION "$VERSIONX"
   #replace dots with - so 10.0.x turns into v10-0-x. kubernetes can't have dots in names
   setVar VERX_NO_DOTS "v${VERSIONX//./-}"
 }

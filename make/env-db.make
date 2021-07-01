@@ -12,18 +12,19 @@ endif
 # phony is any target that might does not really exist and does not relate to a dir or file (most of them)
 .PHONY: sqlserver mysql h2
 # we can do `make build dev sqlserver` or `make build dev sqlserver`
-DB_VENDOR ?= mysql
+# the main Makefile should specify the default
+ifdef DB
+  DB_VENDOR ?= foo
+endif
+
 ifeq (sqlserver,$(filter sqlserver,$(MAKECMDGOALS)))
   DB_VENDOR = sqlserver
 else ifeq (oracle,$(filter oracle,$(MAKECMDGOALS)))
   DB_VENDOR = oracle
+else ifeq (mysql,$(filter oracle,$(MAKECMDGOALS)))
+  DB_VENDOR = mysql
 else ifeq (h2,$(filter h2,$(MAKECMDGOALS)))
   DB_VENDOR = h2
-endif
-
-# ----- if use-docker then force docker builder
-ifeq (use-builder,$(filter use-builder,$(MAKECMDGOALS)))
-  USE_BUILDER = true
 endif
 
 # dummy targets so we dont get the make[1]: Nothing to be done for `xxx'.

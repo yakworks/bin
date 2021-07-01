@@ -73,6 +73,7 @@ function releaseFiles {
   git commit -m "$VERSION release, changelog, version [ci skip]"
 
   echo "---- tag ----"
+  VERSION_TAG="v$VERSION"
   git tag -fa $VERSION_TAG -m "Release $VERSION_TAG [ci skip]"
 
   echo "--- push ---"

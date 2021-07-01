@@ -3,11 +3,11 @@
 # -------------
 
 # --- docker builder ---
-.PHONY: builder-start builder-shell builder-remove start-builder
+.PHONY: builder-start builder-shell builder-remove
 
 # putting @ in front of command hides it from being echoed by make
 # bash ifs have to be one line, as a reminder \ continues the line and need to end each command with a ;
-## start the docker jdk-builder if its not started yet, unless USE_BUILDER=false
+## start the docker jdk-builder if its not started yet
 builder-start: builder-network
 	@$(build.sh) builderStart $(DOCK_BUILDER_NAME) $(DOCK_BUILDER_URL)
 
@@ -23,12 +23,6 @@ builder-shell: builder-start
 builder-remove:
 	@$(build.sh) dockerRemove $(DOCK_BUILDER_NAME)
 	@docker network rm builder-net || true
-
-## calls builder-start if USE_BUILDER=true
-start-builder:
-	@if [ "$(USE_BUILDER)" == "true" ]; then \
-	  $(MAKE) $(DBMS) builder-start; \
-	fi;
 
 .PHONY: dockerhub-login
 # double $$ means esacpe it and send to bash as a single $

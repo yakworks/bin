@@ -4,6 +4,14 @@
 
 # the dir this is in
 BUILD_BIN := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+# include .env, sinclude ignores if its not there
+sinclude ./.env
+# include boilerplate to set BUILD_ENV and DB from targets
+include $(BUILD_BIN)/make/env-db.make
+# calls the build.sh makeEnvFile to build the vairables file for make, recreates on each make run
+shResults := $(shell ./build.sh makeEnvFile $(BUILD_ENV) $(DB_VENDOR))
+# import/sinclude the variables file to make it availiable to make as well
+sinclude ./build/make/makefile.env
 
 HELP_AWK := $(BUILD_BIN)/make/help.awk
 
@@ -21,6 +29,9 @@ help: | _program_awk
 ## list the BUILD_VARS in the build/make env
 log-vars: FORCE
 	$(foreach v, $(sort $(BUILD_VARS)), $(info $(v) = $($(v))))
+
+log-make_vars: FORCE
+	$(foreach v, $(.VARIABLES), $(info $(v) = $($(v))))
 
 ## calls the build.sh log-vars to sanity check
 log-buildsh-vars: FORCE
