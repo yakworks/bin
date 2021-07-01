@@ -26,7 +26,7 @@ function initEnv {
   postInitEnv
 }
 
-# dummy place holder to be overriden in build.sh
+# dummy place holder, should be overriden in projects build.sh
 function postInitEnv { :; }
 
 # create env file from BUILD_VARS for importing into makefile.

@@ -23,7 +23,7 @@ source version.properties
 setVersion $version
 
 # lists all the function/methods
-function list-methods {
+function list-functions {
   shopt -s extdebug
   funcList=`compgen -A function`
   # echo $funcList

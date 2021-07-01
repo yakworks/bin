@@ -2,9 +2,9 @@
 # BUILD_ENV is used to to pass to gradle/liquibase and to build the database name etc....
 BUILD_ENV = dev
 # MAKECMDGOALS has the list of all target goals that are passed into make cmd
-ifeq (test-env,$(filter test-env,${MAKECMDGOALS}))
+ifeq (test-env,$(filter test-env,$(MAKECMDGOALS)))
   BUILD_ENV = test
-else ifeq (seed,$(filter seed,${MAKECMDGOALS}))
+else ifeq (seed,$(filter seed,$(MAKECMDGOALS)))
   BUILD_ENV = seed
 endif
 
@@ -13,16 +13,16 @@ endif
 .PHONY: sqlserver mysql h2
 # we can do `make build dev sqlserver` or `make build dev sqlserver`
 DB_VENDOR ?= mysql
-ifeq (sqlserver,$(filter sqlserver,${MAKECMDGOALS}))
+ifeq (sqlserver,$(filter sqlserver,$(MAKECMDGOALS)))
   DB_VENDOR = sqlserver
-else ifeq (oracle,$(filter oracle,${MAKECMDGOALS}))
+else ifeq (oracle,$(filter oracle,$(MAKECMDGOALS)))
   DB_VENDOR = oracle
-else ifeq (h2,$(filter h2,${MAKECMDGOALS}))
+else ifeq (h2,$(filter h2,$(MAKECMDGOALS)))
   DB_VENDOR = h2
 endif
 
 # ----- if use-docker then force docker builder
-ifeq (use-builder,$(filter use-builder,${MAKECMDGOALS}))
+ifeq (use-builder,$(filter use-builder,$(MAKECMDGOALS)))
   USE_BUILDER = true
 endif
 
