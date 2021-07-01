@@ -24,11 +24,11 @@ check:
 
 ## gradle clean
 clean::
-	${DockerExec} ./gradlew clean
+	$(DockerExec) ./gradlew clean
 
 ## runs gradle classes to compile
 compile:
-	${DockerExec} ./gradlew classes
+	$(DockerExec) ./gradlew classes
 
 ## on multi-project gradles this will merges test results into one spot to store in CI build
 merge-test-results: | _var_GRADLE_PROJECTS
@@ -38,11 +38,11 @@ testArg := $(if $(tests),--tests $(tests), )
 
 ## runs gradle test, add tests=... to pass to gradles --tests
 unit-test:
-	${DockerExec} ./gradlew test $(testArg)
+	$(DockerExec) ./gradlew test $(testArg)
 
 ## runs gradle integrationTest
 int-test:
-	${DockerExec} ./gradlew integrationTest $(testArg)
+	$(DockerExec) ./gradlew integrationTest $(testArg)
 
 boot-run:
-	${DockerExec} ./gradlew -DBMS=${DBMS} -Dgrails.env=${BUILD_ENV} bootRun
+	$(DockerExec) ./gradlew -DBMS=$(DBMS) -Dgrails.env=$(BUILD_ENV) bootRun

@@ -67,4 +67,4 @@ clean::
 .PHONY: clean FORCE
 
 # include the logging make
-include $(BUILD_BIN)/make/logging.mk
+include $(BUILD_BIN)/make/logging.make
