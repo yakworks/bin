@@ -8,14 +8,12 @@ else ifeq (seed,$(filter seed,$(MAKECMDGOALS)))
   BUILD_ENV = seed
 endif
 
+# dummy targets so we dont get the make[1]: Nothing to be done for `xxx'.
+dummy_targets = dev seed test-env
+.PHONY: $(dummy_targets)
+$(dummy_targets):
+	@:
 # ----- setup the specified database based on phony target we pass in
-# phony is any target that might does not really exist and does not relate to a dir or file (most of them)
-.PHONY: sqlserver mysql h2
-# we can do `make build dev sqlserver` or `make build dev sqlserver`
-# the main Makefile should specify the default
-ifdef DB
-  DB_VENDOR ?= foo
-endif
 
 ifeq (sqlserver,$(filter sqlserver,$(MAKECMDGOALS)))
   DB_VENDOR = sqlserver
@@ -27,8 +25,15 @@ else ifeq (h2,$(filter h2,$(MAKECMDGOALS)))
   DB_VENDOR = h2
 endif
 
+# we can do `make build dev sqlserver` or `make build dev sqlserver`
+# the main Makefile should specify the default
+ifdef DB
+
+DB_VENDOR ?= mysql
 # dummy targets so we dont get the make[1]: Nothing to be done for `xxx'.
-dummy_targets = dev seed test-env mysql sqlserver oracle h2
-.PHONY: $(dummy_targets)
-$(dummy_targets):
+dummy_db_targets = mysql sqlserver oracle h2
+.PHONY: $(dummy_db_targets)
+$(dummy_db_targets):
 	@:
+
+endif # end DB check
