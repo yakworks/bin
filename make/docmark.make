@@ -11,6 +11,9 @@ docmark-publish-prep: docmark-build git-clone-pages
 	@cp -r build/site/. build/gh-pages
 	@if [ -d "build/docs/groovydoc" ]; then cp -r build/docs/groovydoc build/site/api; fi
 
+docmark-publish: docmark-publish-prep
+	$(MAKE) git-push-pages
+
 # --- helpers -----
 ## start the docs server locally to serve pages
 docmark-start: docmark-copy-readme
