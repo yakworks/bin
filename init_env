@@ -1,0 +1,130 @@
+# ---
+# default functions to setup BUILD_VARS
+# BUILD_VARS are used in the build.sh and a makefile.env is created
+# that is imcluded at the start of the Makefile to share vars
+# ---
+__dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" # get dir this script is in
+source "${__dir}/setVar"
+source "${__dir}/init_docker_builders"
+source "${__dir}/yaml"
+source "${__dir}/utils"
+
+# version.properties should be in root dir
+if [ -e "version.properties" ]; then source version.properties; fi
+
+# create build/make_env_db.env for importing into makefile.
+# $1 - BUILD_ENV (test, dev, seed)
+# $2 - DBMS Vendor (sqlserver,mysql, etc) *optional*
+function make_env_file {
+  init_env $1 $2
+  mkdir -p build/make
+  createEnvFile "build/make/makefile.env"
+}
+
+# set build environment
+# $1 - BUILD_ENV (test, dev, seed)
+# $2 - DBMS Vendor (sqlserver,mysql, etc) *optional*
+function init_env {
+  setVar BUILD_ENV ${1:-test}
+  [ "$2" ] && setDbEnv $2
+  [ "$version" ] && init_versions
+  # if gradle project then this imports vars from the build.yml
+  init_from_build_yml
+  # add pages vars
+  init_git_pages
+  # if this is running in circle then this will init variables for brnach and releaseing
+  circle_init_env
+  # build and env vars
+  init_docker_builders
+  # this is where to put custom stuff in the build.sh
+  post_init_env
+}
+
+# dummy place holder, should be overriden in projects build.sh
+function post_init_env { :; }
+
+# ---
+# sets the version and sets up the other useful variables for that version such as
+# VERX_NO_DOTS and the NINEDB_VERSION
+# ---
+function init_versions {
+  # if nothing passing in the usee the lowercase version that should have come in from version.properties
+  # local ver=${1:-$version}
+  setVar VERSION "$version"
+  setVar PUBLISHED_VERSION "$publishedVersion"
+  # set the BUILD_VERSION for libs to default to version
+  local buildVer="$VERSION"
+  # if its a snapshot then append the SNAPSHOT
+  if [ $(isTruthy $snapshot) ]; then
+    setVar IS_SNAPSHOT true
+    buildVer="$VERSION-SNAPSHOT"
+  fi
+
+  setVar BUILD_VERSION "$buildVer"
+
+  local dotCount=$(echo "${VERSION}" | awk -F"." '{print NF-1}')
+  # cuts to the last dot
+  local baseVersion=$(echo $VERSION | cut -d. -f1-$dotCount)
+  setVar VERSIONX "$baseVersion.x"
+  #replace dots with - so 10.0.x turns into v10-0-x. kubernetes can't have dots in names
+  setVar VERX_NO_DOTS "v${VERSIONX//./-}"
+
+  return 0
+}
+
+# sets up defaults vars for docker ninedb and dock builders
+function init_from_build_yml {
+  # if gradle
+  if [ -e ./gradle/build.yml ]; then
+    create_yml_variables "gradle/build.yml"
+    setVar RELEASABLE_BRANCHES "$git_releasableBranchRegex"
+    setVar GITHUB_FULLNAME "$github_fullName"
+    setVar CHANGELOG_NAME "$releaseNotes_file"
+    # keeps whats after last /
+    setVar PROJECT_NAME ${GITHUB_FULLNAME##*/}
+  fi
+}
+
+# sets up defaults vars for docker ninedb and dock builders
+function init_git_pages {
+  setVar GH_PAGES_DIR "build/gh-pages"
+  setVar GH_PAGES_BRANCH "gh-pages"
+}
+
+# sets up defaults vars for docker ninedb and dock builders
+function circle_init_env {
+  # if CIRCLE_BRANCH is set then consider it setup
+  if [ "$CIRCLE_BRANCH" ]; then
+    add_build_vars CIRCLE_BRANCH
+    setVar RELEASABLE_BRANCH $(is_releasable_branch "$CIRCLE_BRANCH")
+  fi
+}
+
+# ---
+# checks if the passed in branch matches whats in the RELEASABLE_BRANCHES var
+# $1 - the branch name
+# returns the branch name if it matches, empty if not
+# ---
+function is_releasable_branch {
+  # for testing uncomment
+  # CIRCLE_BRANCH="release/10"
+
+  # set defaults for RELEASABLE_BRANCHES if not set
+  : ${RELEASABLE_BRANCHES:="master|release/.+"}
+  # wraps in the ^(..)$ so it only matches full word not partials
+  local grepRegex="^(${RELEASABLE_BRANCHES})$"
+  # returns the branch name if it matches, empty if not
+  echo "$1" | grep -E "$grepRegex" || true
+}
+
+# create env file from BUILD_VARS for importing into makefile.
+# arg $1 - the file to use
+function createEnvFile {
+  echo "# ----- Generated from build.sh --------" > $1
+  for varName in $BUILD_VARS; do
+      val=${!varName}
+      echo "$varName=$val" >> $1
+  done
+  echo "BUILD_VARS=$BUILD_VARS" >> $1
+  echo "created $1"
+}

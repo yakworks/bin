@@ -6,22 +6,11 @@
 
 binDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # echo "sourcing from binDir $binDir"
-source ${binDir}/setVar
-source ${binDir}/versions
-source ${binDir}/buildEnv
+source ${binDir}/init_env
 source ${binDir}/docker
 source ${binDir}/kubernetes
-source ${binDir}/yaml
-source ${binDir}/git_tools
-source ${binDir}/publish
-source ${binDir}/replaceVersion
-source ${binDir}/circle
 source ${binDir}/docmark
-source ${binDir}/utils
-
-# source the version.properties
-source version.properties
-setVersion $version
+source ${binDir}/sed_tpl
 
 # lists all the function/methods
 function list-functions {

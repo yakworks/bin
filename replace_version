@@ -3,7 +3,7 @@
 # updates the version number in README
 # $1 - the new version to replace old one with
 # $2 - the file name to do the replace
-function replaceVersion {
+function replace_version {
   sed -i -e "s|Version: [0-9.]*[-v]*[0-9.]*|Version: ${1}|g" $2
 
   # updatedContent = updatedContent.replaceFirst(/${p.name}:[\d\.]+[^"]+/, "${p.name}:$version")
@@ -13,8 +13,8 @@ function replaceVersion {
 
 # --- boiler plate function runner, keep at end of file ------
 if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
-  export -f replaceVersion
+  export -f replace_version
 else
-  replaceVersion "${@}"
+  replace_version "${@}"
   exit ${?}
 fi

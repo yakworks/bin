@@ -9,6 +9,11 @@ common scripts, templates and helpers for building and develpment
 ## 12 factor app is the philosophy
 - https://12factor.net
 
+## style guides we endeveur to follow
+
+https://style-guides.readthedocs.io/en/latest/makefile.html
+https://google.github.io/styleguide/shellguide.html
+
 ## Semantic versioning support
 `semver` which is based on [this](https://github.com/fsaintjacques/semver-tool) tool provides utility
 to manipulate semantic version strings from bash scripts.

@@ -79,7 +79,7 @@ function db_start {
 # arg $1 - optional DB, defaults to mysql
 function db-start {
   # env doesn't matter here so just set it to dev
-  initEnv dev ${1:-mysql}
+  init_env dev ${1:-mysql}
   db_start ${DOCK_DB_BUILD_NAME} ${DOCKER_DB_URL} ${DB_PORT}:${DB_PORT} ${PASS_VAR_NAME}=${DB_PASSWORD}
 }
 

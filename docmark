@@ -6,7 +6,7 @@
 
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=src/parse_url.sh
-source "${__dir}/replaceVersion"
+source "${__dir}/replace_version"
 
 DOCMARK_DOCKER_IMAGE=yakworks/docmark
 
@@ -20,7 +20,7 @@ function docmark-serve {
 function cp_readme_index {
   rm -f docs/index.md
   cp README.md docs/index.md
-  [[ "$1" ]] && replaceVersion "$1" docs/index.md
+  [[ "$1" ]] && replace_version "$1" docs/index.md
   # replace the (docs/ text in links as they are in same dir now, ex [foo](docs/bar.md) will become [foo](bar.md)
   sed -i -e "s~(\s*docs\/~(~g" docs/index.md
   return 0

@@ -8,13 +8,13 @@ BUILD_BIN := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 sinclude ./.env
 # include boilerplate to set BUILD_ENV and DB from targets
 include $(BUILD_BIN)/make/env-db.make
-# calls the build.sh makeEnvFile to build the vairables file for make, recreates on each make run
-shResults := $(shell ./build.sh makeEnvFile $(BUILD_ENV) $(DB_VENDOR))
+# calls the build.sh make_env_file to build the vairables file for make, recreates on each make run
+shResults := $(shell ./build.sh make_env_file $(BUILD_ENV) $(DB_VENDOR))
 # import/sinclude the variables file to make it availiable to make as well
 sinclude ./build/make/makefile.env
 # includes for common
 include $(BUILD_BIN)/make/logging.make
-include $(BUILD_BIN)/make/git-tools.make
+include $(BUILD_BIN)/make/ship-it.make
 
 HELP_AWK := $(BUILD_BIN)/make/help.awk
 

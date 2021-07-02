@@ -12,14 +12,14 @@ set -e
 # if any build files change then it will not get cache and gradle will re-download the internet
 # $1 - the project list, if not passed then defaults to whats in env variable GRADLE_PROJECTS
 # ---
-function cache-key-file {
+function create_cache_key {
   cat gradle.properties build.gradle > cache-key.tmp
   local projList="${1:-$GRADLE_PROJECTS}"
   for project in $projList; do
     [ -f $project/build.gradle ] && cat $project/build.gradle >> cache-key.tmp
     [ -f $project/gradle.properties ] && cat $project/gradle.properties >> cache-key.tmp
   done
-  return 0 # do this so make doesn't do make: *** [cache-key-file] Error 1
+  return 0 # do this so make doesn't do make: *** [cache_key_file] Error 1
 }
 
 # ---
@@ -27,14 +27,22 @@ function cache-key-file {
 # this simplifies so we can run circles "store" command on just one dir
 # $1 - the project list, if not passed then defaults to whats in env variable GRADLE_PROJECTS
 # ---
-function merge-test-results {
+function merge_test_results {
   local projList="${1:-$GRADLE_PROJECTS}"
   for project in $projList; do
-    mkdir -p build/test-results/$project
-    mkdir -p build/test-reports/$project
-    cp -r $project/build/test-results/ build/test-results/$project || true
-    cp -r $project/build/reports/. build/test-reports/$project || true
+    _copy_test_results "$project" "test-results"
+    _copy_test_results "$project" "reports"
   done
+}
+
+# $1 - the project name
+# $2 - the build test dir, will either be test-results or reports
+function _copy_test_results {
+  local dir="$1/build/$2/"
+  if [ -d "${dir}" ]; then
+    mkdir -p build/$2/$1
+    cp -r "$dir" build/$2/$1
+  fi
 }
 
 # ---
@@ -48,16 +56,9 @@ function trigger-circle {
     -u "${CIRCLE_TOKEN}:"
 }
 
-# publish the docmark docs
-function ci-publish-docs {
-  IS_RELEASABLE_BRANCH=$(isReleasableBranch "$CIRCLE_BRANCH")
-  if [[ $IS_RELEASABLE_BRANCH ]]; then
-    publishDocs
-  fi
-}
-
 # does the logic for CI to publish the lib
 # $1 - the current branch we are on, on circle pass in $CIRCLE_BRANCH
+# !DEPRECATED here for history only
 function ci-publish-lib {
   # uncomment these for testing
   # CIRCLE_BRANCH=master
@@ -66,7 +67,7 @@ function ci-publish-lib {
   # Old stuff in case we want to resurect the change detection based on commit range
   # CIRCLE_COMMIT_RANGE=$(circleCommitRange)
   # HAS_APP_CHANGES=$(hasAppChanges "$CIRCLE_COMMIT_RANGE")
-  IS_RELEASABLE_BRANCH=$(isReleasableBranch "$1")
+  IS_RELEASABLE_BRANCH=$(is_releasable_branch "$1")
 
   if [[ $IS_RELEASABLE_BRANCH ]]; then
     echo "IS_RELEASABLE_BRANCH:true , snapshot: $snapshot .. calling ./gradlew publish"

@@ -6,7 +6,8 @@ docmark.sh := $(BUILD_BIN)/docmark
 .PHONY: docmark-publish docmark-git-push
 
 # clones pages branch, builds and copies into branch, doesn't push,
-# git-push-pages should be called after this
+# git_push_pages should be called after this or task that calls the push should depend on this one
+# this should be run inside of the docmark docker
 docmark-publish-prep: docmark-build git-clone-pages
 	@cp -r build/site/. build/gh-pages
 	@if [ -d "build/docs/groovydoc" ]; then cp -r build/docs/groovydoc build/site/api; fi

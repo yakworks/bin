@@ -8,7 +8,7 @@ circle.sh := $(BUILD_BIN)/circle
 
 ## generates the cache-key.tmp for CI to checksum. depends on GRADLE_PROJECTS var
 cache-key-file: | _verify_GRADLE_PROJECTS
-	@$(circle.sh) cache-key-file "$(GRADLE_PROJECTS)"
+	@$(circle.sh) create_cache_key "$(GRADLE_PROJECTS)"
 
 ## calls `gradlew resolveConfigurations` to download deps without compiling, used mostly for CI cache
 resolve-dependencies:
@@ -32,7 +32,7 @@ compile:
 
 # on multi-project gradles this will merges test results into one spot to store in CI build
 merge-test-results: FORCE | _verify_GRADLE_PROJECTS
-	$(circle.sh) merge-test-results "$(GRADLE_PROJECTS)"
+	$(circle.sh) merge_test_results "$(GRADLE_PROJECTS)"
 
 testArg := $(if $(tests),--tests $(tests), )
 
