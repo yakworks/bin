@@ -16,6 +16,11 @@ function setVersion {
   # set the BUILD_VERSION for libs to default to version
   local buildVer="$VERSION"
   # if its a snapshot then append the SNAPSHOT
+  if [ $(isTruthy $snapshot) ]; then
+    echo "IS_SNAPSHOT"
+    setVar IS_SNAPSHOT true
+    buildVer="$VERSION-SNAPSHOT"
+  fi
   [ "$snapshot" == "true" ] && buildVer="$VERSION-SNAPSHOT"
   setVar BUILD_VERSION "$buildVer"
 
@@ -25,6 +30,8 @@ function setVersion {
   setVar VERSIONX "$baseVersion.x"
   #replace dots with - so 10.0.x turns into v10-0-x. kubernetes can't have dots in names
   setVar VERX_NO_DOTS "v${VERSIONX//./-}"
+
+  return 0
 }
 
 # ---

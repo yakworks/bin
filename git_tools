@@ -8,13 +8,14 @@
 : "${GH_PAGES_BRANCH:=gh-pages}"
 
 # initialize variables for github
-# arg $1 - the github_fullName in the format of owner/repo
+# arg $1 - the GITHUB_FULLNAME in the format of owner/repo
 function initGithubVars {
-  if [ -z "$GITHUB_FULLNAME" ]; then
+  local ghFullName="${1:-$GITHUB_FULLNAME}"
+  if [ ! "$ghFullName" ]; then
     echo "GITHUB_FULLNAME not set, trying `git config --get remote.origin.url`"
-    GITHUB_FULLNAME=$(git config --get remote.origin.url | cut -d/ -f5 | cut -d. -f1)
+    GITHUB_FULLNAME=$(git config --get remote.origin.url | cut -d/ -f4,5 | cut -d. -f1)
     # if it didn't get it then error
-    [ -z "$GITHUB_FULLNAME" ] && echo "GITHUB_FULLNAME did not get setup" && return 1
+    [ ! "$GITHUB_FULLNAME" ] && echo "GITHUB_FULLNAME did not get setup" && return 1
   fi
   echo "initGithubVars with GITHUB_FULLNAME $GITHUB_FULLNAME"
   # keeps whats after last /
@@ -22,25 +23,41 @@ function initGithubVars {
   GITHUB_LINK_URL="https://github.com/${GITHUB_FULLNAME}"
   GITHUB_BASE_URL="github.com/${GITHUB_FULLNAME}.git"
   GITHUB_URL="https://$GITHUB_BASE_URL"
+  echo "GITHUB_URL $GITHUB_URL"
   # For CI the git user token will be set in env var.
   if [[ $GRGIT_USER ]]; then
+    echo "adding GRGIT_USER token to GITHUB_URL: $GITHUB_URL"
     # add the token
     GITHUB_URL="https://dummy:${GRGIT_USER}@$GITHUB_BASE_URL"
   fi
 
-  : ${GITHUB_BOT_USER:=9cibot}
-  : ${GITHUB_BOT_EMAIL:=9cibot@9ci.com}
+  #echo "GITHUB_URL $GITHUB_URL"
+  verify-git-user
+
+  return 0
+}
+
+# checks is a git user is setup, and if not sets up the bot user, used in CI.
+function verify-git-user {
 
   local hasGitUser=$(git config --global user.email || true)
   # see https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash
-  if [ -z ${hasGitUser:+1} ] || [ "$CI" == "true" ]; then
+  if [ ! "${hasGitUser}" ] || [ "$CI" ]; then
+    echo "adding GITHUB_BOT_USER"
+    : ${GITHUB_BOT_USER:=9cibot}
+    : ${GITHUB_BOT_EMAIL:=9cibot@9ci.com}
     # echo "adding git user"
     config_bot_user $GITHUB_BOT_USER $GITHUB_BOT_EMAIL
   fi
 }
 
+# shows the current git branch
+function current-git-branch {
+  git rev-parse --abbrev-ref HEAD
+}
+
 # clones gh-pages into the build directory
-function clone_gh_pages {
+function git-clone-pages {
   [ "$GITHUB_URL" ] || initGithubVars
   mkdir -p build
   rm -rf $GH_PAGES_DIR
@@ -48,7 +65,7 @@ function clone_gh_pages {
 }
 
 # in build/gh-pages commits and pushes gh pages
-function push_gh_pages {
+function git-push-pages {
   git -C $GH_PAGES_DIR add -A .
   git -C $GH_PAGES_DIR commit -a -m "CI Docs published [skip ci]" || true
   git -C $GH_PAGES_DIR push -q $GITHUB_URL $GH_PAGES_BRANCH || true

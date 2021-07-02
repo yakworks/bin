@@ -44,3 +44,7 @@ test-unit: FORCE
 test-int: FORCE
 	./gradlew integrationTest $(testArg)
 
+## publish snapshot jar to local maven
+snapshot:
+	./gradlew snapshot
+

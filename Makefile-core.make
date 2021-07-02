@@ -12,6 +12,9 @@ include $(BUILD_BIN)/make/env-db.make
 shResults := $(shell ./build.sh makeEnvFile $(BUILD_ENV) $(DB_VENDOR))
 # import/sinclude the variables file to make it availiable to make as well
 sinclude ./build/make/makefile.env
+# includes for common
+include $(BUILD_BIN)/make/logging.make
+include $(BUILD_BIN)/make/git-tools.make
 
 HELP_AWK := $(BUILD_BIN)/make/help.awk
 
@@ -88,5 +91,4 @@ BUILD_DIR =: build
 $(BUILD_DIR):
 	mkdir -p $@
 
-# include the logging make
-include $(BUILD_BIN)/make/logging.make
+

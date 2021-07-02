@@ -38,6 +38,7 @@ function addBuildVars {
 
 # helper/debug function to log out the build_vars
 function log-vars {
+  echo "BUILD_VARS = $BUILD_VARS"
   for varName in $BUILD_VARS; do
     echo "$varName = ${!varName}"
   done

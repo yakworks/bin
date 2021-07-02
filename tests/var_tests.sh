@@ -26,6 +26,10 @@ echo "-- When FOO is unset --"
 [ $(isFalsy "$FOO") ] && echo "FOO is falsy 6"
 [ $(isTruthy "$FOO") ] && echo "** should not show"
 
+[[ "${FOO:-}" = "BOO" ]] && echo "** should not show"
+[[ "$FOO" = "" ]] && echo "** should not show"
+[[ "${FOO:-}" =  ]] && echo "** should not show"
+
 echo
 
 echo "-- When FOO is empty string --"
@@ -43,7 +47,7 @@ FOO=""
 [ "$FOO" ] && echo "** should not show"
 # Will be true now as its empty string
 [ ${FOO+set} ] && echo "FOO is set \${FOO+set} 3"
-[[ $FOO || $FOO == "" ]] && echo "FOO is set long way 4"
+[[ $FOO || $FOO = "" ]] && echo "FOO is set long way 4"
 
 # will NOT be true
 [ ${!VarName} ] && echo "** should not show"
@@ -54,6 +58,9 @@ FOO=""
 # truthy falsy
 [ $(isFalsy "$FOO") ] && echo "FOO is falsy 6"
 [ $(isTruthy "$FOO") ] && echo "** should not show"
+
+[[ "$FOO" = "" ]] && echo "** should not show"
+[[ "${FOO:-}" = "" ]] && echo "** should not show"
 
 echo
 
@@ -81,6 +88,10 @@ FOO="bar"
 [ $(isFalsy "$FOO") ] && echo "** should not show"
 [ $(isTruthy "$FOO") ] && echo "FOO is truthy 8"
 
+[[ "$FOO" = "bar" ]] && echo "good eq check"
+[[ "${FOO:-}" = "bar" ]] && echo "good eq check"
+
+
 echo
 
 echo "-- When FOO=bar ls bazz --"
@@ -103,7 +114,7 @@ FOO="bar ls bazz"
 [[ $FOO ]] && echo "good [[ \$FOO ]] 1" # executes fine with double [[]]
 [ "$FOO" ] && echo 'good [ "$FOO" ] 2'
 [ ${FOO+x} ] && echo "good \${FOO+x} 3"
-[[ $FOO || $FOO == "" ]] && echo 'good [[ $FOO || $FOO == "" ]] 4'
+[[ $FOO || $FOO = "" ]] && echo 'good [[ $FOO || $FOO == "" ]] 4'
 # [ ${!VarName} ] && echo "good \${!VarName}" # !! this blows up now
 [[ ${!VarName} ]] && echo "good [[ \${!VarName} ]] 5" # executes fine with double [[]]
 [ "${!VarName}" ] && echo 'good "${!VarName}" 6'
@@ -163,9 +174,9 @@ echo; echo
 echo -e "\nCombo Falsy FOO=false and BAR=42"; FOO="0"; BAR=42
 # double brackets allow use to have && ||
 [[ $(isFalsy "$FOO") && $(isTruthy "$BAR") ]] && echo "FOO is Falsy && BAR is truthy 1"
-[[ $(isFalsy "$FOO") && $BAR == 42 ]] && echo "FOO is Falsy && BAR is 42 2"
+[[ $(isFalsy "$FOO") && $BAR = 42 ]] && echo "FOO is Falsy && BAR is 42 2"
 [[ $(isFalsy "$FOO") && (($BAR > 40)) ]] && echo "FOO is Falsy && ((BAR > 40)) 3"
-[[ ! $(isFalsy "$FOO") && $BAR == 42 ]] && echo "** should not show"
-[[ $(isTruthy "$FOO") && $BAR == 42 ]] && echo "** should not show"
+[[ ! $(isFalsy "$FOO") && $BAR = 42 ]] && echo "** should not show"
+[[ $(isTruthy "$FOO") && $BAR = 42 ]] && echo "** should not show"
 
 echo; echo

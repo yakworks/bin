@@ -60,7 +60,7 @@ function releaseFiles {
 
   echo "update version in README"
   # versions
-  replaceVersionInFile README.md
+  replaceVersion "$VERSION" README.md
 
   echo "---- increment the version.properties ----"
   # versions

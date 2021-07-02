@@ -30,6 +30,12 @@
 
 - `:=` is called _expansion assignment_. its evaluates at the time of assignment where `=` evaluates after the whole makefile is read. [see here for good explanation](https://andylinuxblog.blogspot.com/2015/06/what-is-colon-equals-sign-in-makefiles.html)   
 
+### Target-specific Variable
+
+A target with a variable right after it like `foo : BAR = true`
+
+[Gnu Docs](https://www.gnu.org/software/make/manual/html_node/Target_002dspecific.html)
+
 ## Calling shell commands
 
 - default shell is `bin/sh` but we change it to bash with `SHELL := /bin/bash`

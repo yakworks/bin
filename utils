@@ -44,13 +44,18 @@ transform_to_java_props() {
   echo "$sysProps"
 }
 
+# https://github.com/Jeff-Russ/bash-boolean-helpers/blob/master/bool-helpers.sh
 # will echo if its falsy
 # to be falsy a value could be false, "false", 0, "0", unset, empty string
 # usage:
 #   FOO=false
 #   [ $(isFalsy "$FOO") ] && echo "FOO is falsy"
 function isFalsy {
-  [ ! "$1" ] && echo "unsetOrEmpty"; [ "$1" = false ] && echo "isFalse"; [ "$1" = 0 ] && echo "is0"
+  local val="$1"
+  if [[ ! $val || $val == false || $val = 0 ]]; then
+    echo "false"
+  fi
+  #[ ! "$1" ] && echo "unsetOrEmpty"; [ "$1" = false ] && echo "isFalse"; [ "$1" = 0 ] && echo "is0"
 }
 
 # will echo if its not falsy
@@ -58,5 +63,7 @@ function isFalsy {
 #   FOO="anything not falsy"
 #   [ $(isTruthy "$FOO") ] && echo "FOO is truthy"
 function isTruthy {
-  [ ! $(isFalsy "$1") ] && echo "isTruthy"
+  if [[ ! $(isFalsy "$1") ]]; then
+    echo "true"
+  fi
 }

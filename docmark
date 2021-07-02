@@ -4,20 +4,26 @@
 # depends on bin/github_pages script
 # ------------------
 
+__dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=src/parse_url.sh
+source "${__dir}/replaceVersion"
+
 DOCMARK_DOCKER_IMAGE=yakworks/docmark
 
-function dockmark-serve {
+function docmark-serve {
   cp_readme_index
-  dockmark_run
+  docmark_run
 }
 
-# Copies readme and replaces links that went into docs
+# Copies readme, updates version and replaces links that went into docs
+# $1 - the version to update
 function cp_readme_index {
   rm -f docs/index.md
   cp README.md docs/index.md
-  replaceVersionInFile docs/index.md
+  [[ "$1" ]] && replaceVersion "$1" docs/index.md
   # replace the (docs/ text in links as they are in same dir now, ex [foo](docs/bar.md) will become [foo](bar.md)
   sed -i -e "s~(\s*docs\/~(~g" docs/index.md
+  return 0
 }
 
 # build the docs, should be run inside the docmark docker
@@ -46,7 +52,7 @@ function publishDocs {
   docmark_publish
 }
 
-function dockmark_run {
+function docmark_run {
   docker run --rm -it --name=mkdocs-serve \
     -v $(pwd):/project \
     -p 8000:8000 \
