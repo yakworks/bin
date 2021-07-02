@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# TODO
+# https://isabelcastillo.com/script-release-github
+# https://hinty.io/ivictbor/publish-and-upload-release-to-github-with-bash-and-curl/
+# https://github.com/terryburton/travis-github-release/blob/master/github-release.sh
+function github_release {
+  echo "WIP to create release on github"
+}
+
+# --- boiler plate function runner, keep at end of file ------
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+  export -f github_release
+else
+  github_release "${@}"
+  exit ${?}
+fi

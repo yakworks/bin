@@ -14,7 +14,7 @@ source ${binDir}/kubernetes
 source ${binDir}/yaml
 source ${binDir}/git_tools
 source ${binDir}/publish
-source ${binDir}/replaveVersion
+source ${binDir}/replaceVersion
 source ${binDir}/circle
 source ${binDir}/docmark
 source ${binDir}/utils
