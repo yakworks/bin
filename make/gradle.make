@@ -3,7 +3,7 @@
 # Makefile-core.make should be imported before this
 # -------------
 gw := ./gradlew
-gradle_tools := $(BUILD_BIN)/gradle_tools
+spring_gradle := $(BUILD_BIN)/spring_gradle
 
 ## runs codenarc and spotless
 lint::
@@ -55,4 +55,4 @@ resolve-dependencies:
 
 # on multi-project gradles this will merges test results into one spot for a CI build
 merge-test-results: FORCE | _verify_PROJECT_SUBPROJECTS
-	$(gradle_tools) merge_test_results "$(PROJECT_SUBPROJECTS)"
+	$(spring_gradle) merge_test_results "$(PROJECT_SUBPROJECTS)"
