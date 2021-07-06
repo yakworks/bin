@@ -15,7 +15,6 @@ if [ -e "version.properties" ]; then source version.properties; fi
 
 # initializes the environment
 function init_env {
-  date >> ./init_env.txt
   [ "$version" ] && init_versions
   # if gradle project then this imports vars from the build.yml
   init_from_build_yml
