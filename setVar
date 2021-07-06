@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# The original purpose here was to be able to set a variable that will be tracked and can then be
+# eported back out to a file can be created and included into Make
 
 # sets the variable value if its not already set and adds it for tracking in BUILD_VARS
 # args $1 - the variable name
@@ -12,6 +15,16 @@ function setVar {
     # echo "curVal is empty, adding"
     eval "$varName=\"\$2\""
   fi
+  add_build_vars $varName
+}
+
+# sets the variable value if its not already set and adds it for tracking in BUILD_VARS
+# args $1 - the variable name
+# args $2 - the variable value to set
+function evalVar {
+  varName="$1"
+  # echo "$varName=\"$2\""
+  eval "$varName=\"$2\""
   add_build_vars $varName
 }
 
@@ -38,8 +51,8 @@ function add_build_vars {
 
 # helper/debug function to log out the build_vars
 function log-vars {
-  echo "BUILD_VARS = $BUILD_VARS"
-  for varName in $BUILD_VARS; do
+  sorted=$(printf "%s\n" $BUILD_VARS | sort)
+  for varName in $sorted; do
     echo "$varName = ${!varName}"
   done
 }

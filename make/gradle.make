@@ -2,49 +2,57 @@
 # Common gradle tasks and helpers for CI.
 # Makefile-core.make should be imported before this
 # -------------
-circle.sh := $(BUILD_BIN)/circle
-
-.PHONY: cache-key-file resolve-dependencies
-
-## generates the cache-key.tmp for CI to checksum. depends on GRADLE_PROJECTS var
-cache-key-file: | _verify_GRADLE_PROJECTS
-	@$(circle.sh) create_cache_key "$(GRADLE_PROJECTS)"
-
-## calls `gradlew resolveConfigurations` to download deps without compiling, used mostly for CI cache
-resolve-dependencies:
-	./gradlew resolveConfigurations --no-daemon
+gw := ./gradlew
+gradle_tools := $(BUILD_BIN)/gradle_tools
 
 ## runs codenarc and spotless
 lint::
-	./gradlew spotlessCheck codenarcMain
+	$(gw) spotlessCheck codenarcMain
 
 ## Run the lint and test suite with ./gradlew check
 check::
-	./gradlew check
+	$(gw) check
 
-## gradle clean
 clean::
-	./gradlew clean
+	$(gw) clean
 
-## compiles with gradle classes
-compile:
-	./gradlew classes
+compile::
+	$(gw) classes
 
-# on multi-project gradles this will merges test results into one spot to store in CI build
-merge-test-results: FORCE | _verify_GRADLE_PROJECTS
-	$(circle.sh) merge_test_results "$(GRADLE_PROJECTS)"
+## builds jars, gradle assemble
+build::
+	$(gw) assemble
 
-testArg := $(if $(tests),--tests $(tests), )
+testArg := $(if $(tests),--tests *$(tests)*, )
 
-## unit tests with gradle test, add tests=... to pass to gradles --tests
-test-unit: FORCE
-	./gradlew test $(testArg)
+test::
+	$(gw) test integrationTest
 
-## integration tests with gradle integrationTest
-test-int: FORCE
-	./gradlew integrationTest $(testArg)
+## unit tests with gradle test, tests=PartialTestName will pass --tests *PartialTestName*
+test-unit::
+	$(gw) test $(testArg)
 
-## publish snapshot jar to local maven
-snapshot:
-	./gradlew snapshot
+## integration and functional tests, tests=PartialTestName will pass --tests *PartialTestName*
+test-e2e::
+	$(gw) integrationTest $(testArg)
 
+## publish the libs
+publish::
+	$(gw) publish
+
+# verifies the snapshot is set
+_verify-snapshot: FORCE
+	@_=$(if $(IS_SNAPSHOT),,$(error set snapshot=true in version properties))
+
+snapshot:: | _verify-snapshot
+	$(gw) snapshot
+
+.PHONY: resolve-dependencies merge-test-results
+
+# calls `gradlew resolveConfigurations` to download deps without compiling, used mostly for CI cache
+resolve-dependencies:
+	$(gw) resolveConfigurations --no-daemon
+
+# on multi-project gradles this will merges test results into one spot for a CI build
+merge-test-results: FORCE | _verify_PROJECT_SUBPROJECTS
+	$(gradle_tools) merge_test_results "$(PROJECT_SUBPROJECTS)"

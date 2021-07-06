@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# TODO
+# Helper functions to call Githubs release rest endpoint to make a release from a tag
+# TODO See following links for ideas on how to implement
 # https://isabelcastillo.com/script-release-github
 # https://hinty.io/ivictbor/publish-and-upload-release-to-github-with-bash-and-curl/
 # https://github.com/terryburton/travis-github-release/blob/master/github-release.sh

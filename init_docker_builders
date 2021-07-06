@@ -1,3 +1,4 @@
+#!/bin/bash
 # ---
 # sets up docker build vars
 # ---
@@ -5,8 +6,8 @@
 # sets up defaults vars for docker ninedb and dock builders
 function init_docker_builders {
   # default docker builder
-  setVar DOCK_BUILDER_NAME "${PROJECT_NAME}-builder"
-  setVar DOCK_BUILDER_URL "yakworks/alpine-jdk:builder8"
+  setVar BUILDER_NAME "${PROJECT_NAME}-builder"
+  setVar BUILDER_URL "yakworks/alpine-jdk:builder8"
 
   # Defaults for builderes
   setVar USE_DOCKER_DB_BUILDER false
@@ -16,7 +17,7 @@ function init_docker_builders {
     USE_DOCKER_DB_BUILDER=false
   fi
 
-  setVar DockerShellExec "docker exec -it ${DOCK_BUILDER_NAME}"
+  setVar BUILDER_EXEC "docker exec -it ${BUILDER_NAME}"
 }
 
 # setups the env specific variables

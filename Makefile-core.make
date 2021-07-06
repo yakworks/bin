@@ -18,6 +18,59 @@ include $(BUILD_BIN)/make/ship-it.make
 
 HELP_AWK := $(BUILD_BIN)/make/help.awk
 
+# -- standard names, all double :: so you can have many
+# NOTE: any targets implemneted in main Makefile or others must also have :: for these
+# See https://www.gnu.org/software/make/manual/make.html#Double_002dColon for more information.
+
+## removes build artifacts
+clean::
+	@:
+
+## runs lint and code style checks
+lint::
+	@:
+
+## compiles the app
+compile::
+	@:
+
+## Run the lint and tests
+check::
+	@:
+
+## runs all tests
+test::
+	@:
+
+## runs unit tests
+test-unit::
+	@:
+
+## runs integration/e2e tests
+test-e2e::
+	@:
+
+## builds the libs
+build::
+	@:
+
+## publish the libs
+publish::
+	@:
+
+# Full release, version bump, changelog update... usually only CI
+release::
+	@:
+
+# Deploy the app. dockerize, kubernetes, etc... usually only CI
+deploy::
+	@:
+
+# Useful for forcing targets to build when .PHONY doesn't help, plus it looks a bit cleaner in many cases than .phony
+FORCE:
+
+.PHONY: clean lint compile check test test-unit test-e2e build publish release deploy FORCE
+
 # see Target-specific Variable Values for above https://www.gnu.org/software/make/manual/html_node/Target_002dspecific.html
 # done so main Makefile is seperate and comes last in awk so any help comments win for main file
 help: _HELP_F := $(firstword $(MAKEFILE_LIST))
@@ -36,12 +89,12 @@ log-vars: FORCE
 log-make_vars: FORCE
 	$(foreach v, $(.VARIABLES), $(info $(v) = $($(v))))
 
-## calls the build.sh log-vars to sanity check
+# calls the build.sh log-vars to sanity check
 log-buildsh-vars: FORCE
 	$(build.sh) log-vars
 
 ## list all the functions sourced into the build.sh
-list-buildsh-functions: FORCE
+list-functions: FORCE
 	$(build.sh) list-functions
 
 # Helper target for declaring an external executable as a recipe dependency.
@@ -66,24 +119,6 @@ _awk_case = $(shell echo | awk '{ print $(1)("$(2)") }')
 lc = $(call _awk_case,tolower,$(1))
 uc = $(call _awk_case,toupper,$(1))
 
-# Useful for forcing targets to build when .PHONY doesn't help, plus it looks a bit cleaner in many cases than .phony
-FORCE:
-
-# Removes build artifacts, implement with your own `clean::` target to remove additional artifacts.
-# See https://www.gnu.org/software/make/manual/make.html#Double_002dColon for more information.
-## removes build artifacts
-clean::
-	@:
-
-## runs linter
-lint::
-	@:
-
-## Run the lint and test suites
-check::
-	@:
-
-.PHONY: clean lint check FORCE
 
 # The defult build dir, if we have only one it'll be easier to cleanup
 BUILD_DIR =: build

@@ -15,7 +15,7 @@ source "${__dir}/git_tools" # source it in
 # $1 - the current dev version
 # $2 - the previous published version
 # $3 - the changelog filename
-# $4 - the GITHUB_FULLNAME in the format of owner/repo, such as yakworks/gorm-tools
+# $4 - the PROJECT_FULLNAME in the format of owner/repo, such as yakworks/gorm-tools
 # ---
 function release_prep {
   echo "snapshot:false ... doing release process for version bump"
@@ -37,7 +37,7 @@ function release_prep {
 # $1 - the current dev version we are releasing
 # $2 - the changelog filename
 # $3 - the CI or release branch to push to, should be the active git branch that is checked out such as master
-# $4 - the GITHUB_FULLNAME in the format of owner/repo, such as yakworks/gorm-tools
+# $4 - the PROJECT_FULLNAME in the format of owner/repo, such as yakworks/gorm-tools
 # ---
 function release_tag {
   local versionTag="v$1"
@@ -61,7 +61,7 @@ function release_tag {
 # $1 - the current dev version
 # $2 - the previous published version
 # $3 - the changelog filename
-# $4 - the GITHUB_FULLNAME in the format of owner/repo, such as yakworks/gorm-tools
+# $4 - the PROJECT_FULLNAME in the format of owner/repo, such as yakworks/gorm-tools
 function update_changelog {
   # the GITHUB_LINK_URL such as https://github.com/yakworks/gorm-tools to make anchors in changelog
   [ "$GITHUB_LINK_URL" ] || init_github_vars "$4"

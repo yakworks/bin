@@ -1,3 +1,4 @@
+#!/bin/bash
 # ---
 # default functions to setup BUILD_VARS
 # BUILD_VARS are used in the build.sh and a makefile.env is created
@@ -12,36 +13,50 @@ source "${__dir}/utils"
 # version.properties should be in root dir
 if [ -e "version.properties" ]; then source version.properties; fi
 
-# create build/make_env_db.env for importing into makefile.
-# $1 - BUILD_ENV (test, dev, seed)
-# $2 - DBMS Vendor (sqlserver,mysql, etc) *optional*
-function make_env_file {
-  init_env $1 $2
-  mkdir -p build/make
-  createEnvFile "build/make/makefile.env"
-}
-
-# set build environment
-# $1 - BUILD_ENV (test, dev, seed)
-# $2 - DBMS Vendor (sqlserver,mysql, etc) *optional*
+# initializes the environment
 function init_env {
-  setVar BUILD_ENV ${1:-test}
-  [ "$2" ] && setDbEnv $2
+  date >> ./init_env.txt
   [ "$version" ] && init_versions
   # if gradle project then this imports vars from the build.yml
   init_from_build_yml
-  # add pages vars
-  init_git_pages
+  # standards
+  setVar PROJECT_NAME ${PROJECT_FULLNAME##*/}
+
+  # add pages defaults
+  init_pages_defaults
   # if this is running in circle then this will init variables for brnach and releaseing
   circle_init_env
   # build and env vars
   init_docker_builders
   # this is where to put custom stuff in the build.sh
-  post_init_env
+  # post_init_env
 }
 
-# dummy place holder, should be overriden in projects build.sh
-function post_init_env { :; }
+# sets up defaults vars for docker ninedb and dock builders
+function init_from_build_yml {
+  # if gradle
+  if [ -e ./build.yml ]; then
+    create_yml_variables "./build.yml"
+
+    local varsToEval="project_fullName project_subprojects "
+    # release
+    varsToEval+="release_changelog release_branch_regex "
+    # pages
+    varsToEval+="pages_build_dir pages_branch "
+    # builder
+    varsToEval+="builder_exec builder_name builder_url "
+    # app
+    varsToEval+="app_name app_key app_dir app_jar app_docker_url "
+    # kubernetes
+    varsToEval+="app_kub_nfs app_kub_namespace app_kub_ingress_url "
+
+    for varName in $varsToEval; do
+      local upperVarName=$(echo "$varName" | awk '{print toupper($0)}')
+      [ "${!varName}" ] && evalVar $upperVarName "${!varName}"
+    done
+  fi
+}
+
 
 # ---
 # sets the version and sets up the other useful variables for that version such as
@@ -52,7 +67,6 @@ function init_versions {
   # local ver=${1:-$version}
   setVar VERSION "$version"
   setVar PUBLISHED_VERSION "$publishedVersion"
-  # set the BUILD_VERSION for libs to default to version
   local buildVer="$VERSION"
   # if its a snapshot then append the SNAPSHOT
   if [ $(isTruthy $snapshot) ]; then
@@ -72,23 +86,10 @@ function init_versions {
   return 0
 }
 
-# sets up defaults vars for docker ninedb and dock builders
-function init_from_build_yml {
-  # if gradle
-  if [ -e ./gradle/build.yml ]; then
-    create_yml_variables "gradle/build.yml"
-    setVar RELEASABLE_BRANCHES "$git_releasableBranchRegex"
-    setVar GITHUB_FULLNAME "$github_fullName"
-    setVar CHANGELOG_NAME "$releaseNotes_file"
-    # keeps whats after last /
-    setVar PROJECT_NAME ${GITHUB_FULLNAME##*/}
-  fi
-}
-
-# sets up defaults vars for docker ninedb and dock builders
-function init_git_pages {
-  setVar GH_PAGES_DIR "build/gh-pages"
-  setVar GH_PAGES_BRANCH "gh-pages"
+# sets up defaults for PAGESif they are not setup already
+function init_pages_defaults {
+  setVar PAGES_BUILD_DIR "build/gh-pages"
+  setVar PAGES_BRANCH "gh-pages"
 }
 
 # sets up defaults vars for docker ninedb and dock builders
@@ -96,26 +97,44 @@ function circle_init_env {
   # if CIRCLE_BRANCH is set then consider it setup
   if [ "$CIRCLE_BRANCH" ]; then
     add_build_vars CIRCLE_BRANCH
-    setVar RELEASABLE_BRANCH $(is_releasable_branch "$CIRCLE_BRANCH")
+    setVar RELEASABLE_BRANCH $(is_releasable_branch "$CIRCLE_BRANCH" "$RELEASE_BRANCH_REGEX")
   fi
 }
 
 # ---
-# checks if the passed in branch matches whats in the RELEASABLE_BRANCHES var
+# checks if the passed in branch matches whats in the release_branch_regex var
 # $1 - the branch name
+# $2 - the RELEASE_BRANCH_REGEX
 # returns the branch name if it matches, empty if not
 # ---
 function is_releasable_branch {
-  # for testing uncomment
-  # CIRCLE_BRANCH="release/10"
-
-  # set defaults for RELEASABLE_BRANCHES if not set
-  : ${RELEASABLE_BRANCHES:="master|release/.+"}
   # wraps in the ^(..)$ so it only matches full word not partials
-  local grepRegex="^(${RELEASABLE_BRANCHES})$"
+  local grepRegex="^(${RELEASE_BRANCH_REGEX})$"
   # returns the branch name if it matches, empty if not
   echo "$1" | grep -E "$grepRegex" || true
 }
+
+# create build/make_env_db.env for importing into makefile.
+# $1 - BUILD_ENV (test, dev, seed)
+# $2 - DBMS Vendor (sqlserver,mysql, etc) *optional*
+function make_env_file {
+  set_build_env $1 $2
+  # init_env
+  mkdir -p build/make
+  createEnvFile "build/make/makefile.env"
+}
+
+# set build environment
+# $1 - BUILD_ENV (test, dev, seed)
+# $2 - DBMS Vendor (sqlserver,mysql, etc) *optional*
+function set_build_env {
+  setVar BUILD_ENV ${1:-test}
+  [ "$2" ] && setDbEnv $2
+  post_build_env
+}
+
+# dummy place holder, should be overriden in projects build.sh
+function post_build_env { :; }
 
 # create env file from BUILD_VARS for importing into makefile.
 # arg $1 - the file to use
@@ -128,3 +147,5 @@ function createEnvFile {
   echo "BUILD_VARS=$BUILD_VARS" >> $1
   echo "created $1"
 }
+
+

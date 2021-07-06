@@ -39,7 +39,11 @@ complex_test:
       - 7
       - 8
       - 9
-
+sample:
+  lists:
+      - foo
+      - bar
+      - bazz
 ---
 more_tests:
   double_dashes: --ok

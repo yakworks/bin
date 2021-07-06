@@ -41,7 +41,10 @@ function test_list() {
 
     if is_debug; then echo; fi
 }
-
+listItems="${sample_lists[*]}"
+for item in $listItems; do
+    echo "item in list $item"
+done
 # Tests
 [ "$person_name" = "Jonathan" ] &&
 [ "$person_age" = "99" ] &&

@@ -5,29 +5,30 @@
 # ------------------
 set -e  # Abort script at first error, when a command exits with non-zero status
 
-# defaults, this format says if GH_PAGES_DIR is not set then set it to these values
-: "${GH_PAGES_DIR:=build/gh-pages}"
-: "${GH_PAGES_BRANCH:=gh-pages}"
+# defaults, this format says if PAGES_BUILD_DIR is not set then set it to these values
+: "${PAGES_BUILD_DIR:=build/gh-pages}"
+: "${PAGES_BRANCH:=gh-pages}"
 
 # initialize variables for github
-# will try and constuct GITHUB_FULLNAME from git config if not passed in
-# $1 - the GITHUB_FULLNAME in the format of owner/repo, if not passed in then it will constuct it
+# will try and constuct PROJECT_FULLNAME from git config if not passed in
+# $1 - the PROJECT_FULLNAME in the format of owner/repo, if not passed in then it will constuct it
 function init_github_vars {
-  local ghFullName="${1:-$GITHUB_FULLNAME}"
+  local ghFullName="${1:-$PROJECT_FULLNAME}"
   if [ ! "$ghFullName" ]; then
-    echo "GITHUB_FULLNAME not set, trying `git config --get remote.origin.url`"
-    GITHUB_FULLNAME=$(git config --get remote.origin.url | cut -d/ -f4,5 | cut -d. -f1)
+    echo "PROJECT_FULLNAME not set, trying `git config --get remote.origin.url`"
+    PROJECT_FULLNAME=$(git config --get remote.origin.url | cut -d/ -f4,5 | cut -d. -f1)
     # if it didn't get it then error
-    [ ! "$GITHUB_FULLNAME" ] && echo "GITHUB_FULLNAME did not get setup" && return 1
-    ghFullName="$GITHUB_FULLNAME"
+    [ ! "$PROJECT_FULLNAME" ] && echo "PROJECT_FULLNAME did not get setup" && return 1
+    ghFullName="$PROJECT_FULLNAME"
   fi
-  echo "init_github_vars with GITHUB_FULLNAME $ghFullName"
+
+  # echo "init_github_vars with PROJECT_FULLNAME $ghFullName"
   # keeps whats after last /
   GITHUB_REPO=${ghFullName##*/}
   GITHUB_LINK_URL="https://github.com/${ghFullName}"
   GITHUB_BASE_URL="github.com/${ghFullName}.git"
   GITHUB_URL="https://$GITHUB_BASE_URL"
-  echo "GITHUB_URL $GITHUB_URL"
+  # echo "GITHUB_URL $GITHUB_URL"
   # For CI the git user token will be set in env var.
   if [[ $GRGIT_USER ]]; then
     echo "adding GRGIT_USER token to GITHUB_URL: $GITHUB_URL"
@@ -61,12 +62,12 @@ function current_git_branch {
 }
 
 # clones gh-pages into the build directory
-# $1 - GH_PAGES_BRANCH the branch, normally gh-pages
-# $2 - GH_PAGES_DIR the dir to clone it to, build/gh-pages
-# $3 - GITHUB_FULLNAME the full name
+# $1 - PAGES_BRANCH the branch, normally gh-pages
+# $2 - PAGES_BUILD_DIR the dir to clone it to, build/gh-pages
+# $3 - PROJECT_FULLNAME the full name
 function git_clone_pages {
-  local pagesBranch="${1:-$GH_PAGES_BRANCH}"
-  local pagesDir="${2:-$GH_PAGES_DIR}"
+  local pagesBranch="${1:-$PAGES_BRANCH}"
+  local pagesDir="${2:-$PAGES_BUILD_DIR}"
   [ "$GITHUB_URL" ] || init_github_vars "$3"
   mkdir -p build
   rm -rf "$pagesDir"
@@ -74,12 +75,12 @@ function git_clone_pages {
 }
 
 # in build/gh-pages commits and pushes gh pages
-# $1 - GH_PAGES_BRANCH the branch, normally gh-pages
-# $2 - GH_PAGES_DIR the dir to clone it to, build/gh-pages
-# $3 - GITHUB_FULLNAME the full name
+# $1 - PAGES_BRANCH the branch, normally gh-pages
+# $2 - PAGES_BUILD_DIR the dir to clone it to, build/gh-pages
+# $3 - PROJECT_FULLNAME the full name
 function git_push_pages {
-  local pagesBranch="${1:-$GH_PAGES_BRANCH}"
-  local pagesDir="${2:-$GH_PAGES_DIR}"
+  local pagesBranch="${1:-$PAGES_BRANCH}"
+  local pagesDir="${2:-$PAGES_BUILD_DIR}"
   [ "$GITHUB_URL" ] || init_github_vars "$3"
   git -C $pagesDir add -A .
   git -C $pagesDir commit -a -m "CI Docs published [skip ci]" || true # or true so doesnt blow error if no changes
@@ -92,7 +93,7 @@ function git_push_pages {
 # arg $1 - bot user name
 # arg $2 - bot user email
 function config_bot_user {
-  echo "config_bot_user with $1 $2"
+  echo "config_bot_user with $1"
   git config credential.helper 'cache --timeout=120'
   git config --global user.email "$2"
   git config --global user.name "$1"
@@ -106,9 +107,9 @@ function init_gh_pages {
   mkdir -p build
   cd build
   rm -rf gh-pages
-  git clone $GITHUB_URL $GH_PAGES_BRANCH
+  git clone $GITHUB_URL $PAGES_BRANCH
   cd gh-pages
-  git checkout --orphan $GH_PAGES_BRANCH
+  git checkout --orphan $PAGES_BRANCH
   git rm -rf .
   echo "github pages site" > README.md
   push_gh_pages
@@ -149,7 +150,7 @@ function hasDocChanges {
 #Just a helper to show variables which can be useful for debugging
 function git_debug {
   [ "$GITHUB_URL" ] || init_github_vars
-  echo "GITHUB_FULLNAME: $GITHUB_FULLNAME"
+  echo "PROJECT_FULLNAME: $PROJECT_FULLNAME"
   echo "GITHUB_BASE_URL: $GITHUB_BASE_URL"
   echo "GITHUB_URL: $GITHUB_URL"
   echo "GITHUB_BOT_USER: $GITHUB_BOT_USER"
