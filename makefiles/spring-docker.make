@@ -25,15 +25,14 @@ DEPLOY_SOURCES := $(wildcard $(deploy_src_dir)/*)
 build/docker/Dockerfile: $(build_docker_dir) $(DEPLOY_SOURCES) | _verify_APP_JAR _verify_APP_DIR
 	@ echo "copy Dockerfile"
 	@ rm -rf $(build_docker_dir)/*
-	@ cp "$(deploy_src_dir)/Dockerfile" "$(build_docker_dir)/"; \
-	  cp $(deploy_src_dir)/docker-compose.yml "$(build_docker_dir)/"; \
-	  cp $(deploy_src_dir)/*.sh "$(build_docker_dir)/"
+	cp -r $(deploy_src_dir)/. $(build_docker_dir);
 
+# copies the jar in and explodes it
 build/docker/app.jar: $(APP_JAR) build/docker/Dockerfile | _verify_APP_JAR _verify_APP_DIR
 	@ echo "copy app.jar"
 	@ cp $(APP_JAR) $(build_docker_dir)/app.jar; \
-	  cd $(build_docker_dir); \
-	  jar -xf app.jar; \
+	  	cd $(build_docker_dir); \
+	  	jar -xf app.jar; \
 
 # $(build.sh) docker_build_prep $(deploy_src_dir) $(APP_JAR) $(build_docker_dir)
 

@@ -53,6 +53,10 @@ snapshot:: | _verify-snapshot
 $(APP_JAR):
 	$(gw) assemble
 
+## java runs the APP_JAR
+start-jar: $(APP_JAR)
+	java -server -Xmx3048m -XX:MaxMetaspaceSize=256m -jar $(APP_JAR)
+
 .PHONY: resolve-dependencies merge-test-results
 
 # calls `gradlew resolveConfigurations` to download deps without compiling, used mostly for CI cache
