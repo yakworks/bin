@@ -66,21 +66,25 @@ function init_versions {
   # local ver=${1:-$version}
   setVar VERSION "$version"
   setVar PUBLISHED_VERSION "$publishedVersion"
-  local buildVer="$VERSION"
-  # if its a snapshot then append the SNAPSHOT
-  if [ $(isTruthy $snapshot) ]; then
-    setVar IS_SNAPSHOT true
-    buildVer="$VERSION-SNAPSHOT"
-  fi
-
-  setVar BUILD_VERSION "$buildVer"
 
   local dotCount=$(echo "${VERSION}" | awk -F"." '{print NF-1}')
   # cuts to the last dot
   local baseVersion=$(echo $VERSION | cut -d. -f1-$dotCount)
+
+  # VERSIONX is used for docker and kubernetes as we deploy latests minor version
+  # also used to connect to the latest compatible database when that is relevant
   setVar VERSIONX "$baseVersion.x"
   #replace dots with - so 10.0.x turns into v10-0-x. kubernetes can't have dots in names
   setVar VERX_NO_DOTS "v${VERSIONX//./-}"
+
+  setVar BUILD_VERSION "$VERSION"
+
+  # if its a snapshot then append the SNAPSHOT
+  if [ $(isTruthy $snapshot) ]; then
+    setVar IS_SNAPSHOT true
+    BUILD_VERSION+="-SNAPSHOT"
+    VERX_NO_DOTS+="-SNAPSHOT"
+  fi
 
   return 0
 }

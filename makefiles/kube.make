@@ -25,4 +25,4 @@ git-tag:
 	@$(build.sh) git_tag $(VERSION) "[skip ci] bumped version to $(VERSION)"
 	@$(build.sh) git_push_tags
 
-release: update-version build/docker-build build/docker-deploy git-tag #Create and push git tag, build new docker image, push to dockerhub
+release: update-version build/docker-build build/docker_push git-tag #Create and push git tag, build new docker image, push to dockerhub

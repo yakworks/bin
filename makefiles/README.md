@@ -1,3 +1,5 @@
+This dir contains optional make files to include and help kickstart common targets depending on project language and structure
+
 # Quick Cheat Sheet and Tips for Makefiles
 
 ## Formatting

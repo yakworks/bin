@@ -7,13 +7,10 @@
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=src/parse_url.sh
 source "${__dir}/replace_version"
+source "${__dir}/docker_tools"
 
 DOCMARK_DOCKER_IMAGE=yakworks/docmark
-
-function docmark-serve {
-  cp_readme_index
-  docmark_run
-}
+DOCMARK_DOCKER_NAME=docmark-server
 
 # Copies readme, updates version and replaces links that went into docs
 # $1 - the version to update
@@ -53,21 +50,33 @@ function publishDocs {
 }
 
 function docmark_run {
-  docker run --rm -it --name=mkdocs-serve \
-    -v $(pwd):/project \
+  dockerStart $DOCMARK_DOCKER_NAME -it \
+    -w /project \
     -p 8000:8000 \
-    -e GRGIT_USER=${GRGIT_USER} \
-    $DOCMARK_DOCKER_IMAGE $1
+	  -v `pwd`:/project:delegated  \
+		$DOCMARK_DOCKER_IMAGE
 }
 
 # use this to open shell and test circle commands
 function docmark_shell {
-  docker run --rm -it --name=mkdocs-serve \
-    -v $(pwd):/project \
-    -p 8000:8000 \
+  dockerStart $DOCMARK_DOCKER_NAME --rm -it \
     --entrypoint /bin/bash \
+    -p 8000:8000 \
+	  -v `pwd`:/project:delegated  \
     -e GRGIT_USER=${GRGIT_USER} \
-    $DOCMARK_DOCKER_IMAGE
+		$DOCMARK_DOCKER_IMAGE
+
+  # GRGIT_USER gitub token is passed from local env to docmark so we can test publish
+}
+
+# use this to open shell and test circle commands
+function docmark_remove {
+  dockerRemove $DOCMARK_DOCKER_NAME
+}
+
+# use this to open shell and test circle commands
+function docmark_pull {
+  docker pull $DOCMARK_DOCKER_IMAGE
 }
 
 # --- boiler plate function runner, keep at end of file ------

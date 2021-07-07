@@ -7,16 +7,16 @@ BUILD_BIN := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 # include .env, sinclude ignores if its not there
 sinclude ./.env
 # include boilerplate to set BUILD_ENV and DB from targets
-include $(BUILD_BIN)/make/env-db.make
+include $(BUILD_BIN)/make_core/env-db.make
 # calls the build.sh make_env_file to build the vairables file for make, recreates on each make run
 shResults := $(shell ./build.sh make_env_file $(BUILD_ENV) $(DB_VENDOR))
 # import/sinclude the variables file to make it availiable to make as well
 sinclude ./build/make/makefile.env
 # includes for common
-include $(BUILD_BIN)/make/logging.make
-include $(BUILD_BIN)/make/ship-it.make
+include $(BUILD_BIN)/make_core/logging.make
+include $(BUILD_BIN)/make_core/ship-it.make
 
-HELP_AWK := $(BUILD_BIN)/make/help.awk
+HELP_AWK := $(BUILD_BIN)/make_core/help.awk
 
 # -- standard names, all double :: so you can have many
 # NOTE: any targets implemneted in main Makefile or others must also have :: for these
@@ -96,6 +96,11 @@ log-buildsh-vars: FORCE
 ## list all the functions sourced into the build.sh
 list-functions: FORCE
 	$(build.sh) list-functions
+
+.PHONY: list-targets
+## list all the availible Make targets, including the targets hidden from core help
+list-targets:
+	@LC_ALL=C $(MAKE) -pRrq -f $(firstword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort -u | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 
 # Helper target for declaring an external executable as a recipe dependency.
 # For example,

@@ -1,5 +1,6 @@
 # -------------
-# Common gradle tasks and helpers for CI.
+# Common gradle tasks and helpers for spring/grails.
+# Its opionated based on a springboot or grails app and assumes that codenarc and spotlessCheck are installed
 # Makefile-core.make should be imported before this
 # -------------
 gw := ./gradlew
@@ -44,8 +45,13 @@ publish::
 _verify-snapshot: FORCE
 	@_=$(if $(IS_SNAPSHOT),,$(error set snapshot=true in version properties))
 
+## build snapshot(s) into you local maven
 snapshot:: | _verify-snapshot
 	$(gw) snapshot
+
+# here so we can depend on it being there and if not firing assemble
+$(APP_JAR):
+	$(gw) assemble
 
 .PHONY: resolve-dependencies merge-test-results
 
@@ -56,3 +62,16 @@ resolve-dependencies:
 # on multi-project gradles this will merges test results into one spot for a CI build
 merge-test-results: FORCE | _verify_PROJECT_SUBPROJECTS
 	$(spring_gradle) merge_test_results "$(PROJECT_SUBPROJECTS)"
+
+.PHONY: publish-lib
+# empty targets so make doesn't blow up when not a RELEASABLE_BRANCH
+# publish the library jar, gradle publish if a gradle project
+publish-lib:
+
+ifdef RELEASABLE_BRANCH
+
+ publish-lib:
+	@if [ "$(IS_SNAPSHOT)" ]; then echo "publishing SNAPSHOT"; else echo "publishing release"; fi
+	./gradlew publish
+
+endif # end RELEASABLE_BRANCH

@@ -29,11 +29,11 @@ endif
 # the main Makefile should specify the default
 ifdef DB
 
-DB_VENDOR ?= mysql
-# dummy targets so we dont get the make[1]: Nothing to be done for `xxx'.
-dummy_db_targets = mysql sqlserver oracle h2
-.PHONY: $(dummy_db_targets)
-$(dummy_db_targets):
+ DB_VENDOR ?= mysql
+ # dummy targets so we dont get the make[1]: Nothing to be done for `xxx'.
+ dummy_db_targets = mysql sqlserver oracle h2
+ .PHONY: $(dummy_db_targets)
+ $(dummy_db_targets):
 	@:
 
 endif # end DB check

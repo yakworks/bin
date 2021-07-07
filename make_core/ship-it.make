@@ -1,6 +1,5 @@
 # -------------
-# targets for release process
-# included in core
+# targets for release process on git, not
 # -------------
 
 shipit := $(BUILD_BIN)/ship_it
@@ -22,6 +21,3 @@ release-prep: | _verify_VERSION _verify_PUBLISHED_VERSION _verify_RELEASE_CHANGE
 release-tag: release-prep | _verify_VERSION _verify_RELEASABLE_BRANCH _verify_PUBLISHED_VERSION _verify_RELEASE_CHANGELOG _verify_PROJECT_FULLNAME
 	$(shipit) release_tag $(VERSION) $(RELEASE_CHANGELOG) $(RELEASABLE_BRANCH) $(PROJECT_FULLNAME)
 
-# _verify_RELEASABLE_BRANCH ensures its set to a value or this will fail
-# updates files and pushes tag release, use in CI
-release-it: release-tag | _verify_RELEASABLE_BRANCH

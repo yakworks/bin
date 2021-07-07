@@ -13,8 +13,9 @@ function builderStart {
   # the .gradle-docker volume map is so that it keeps the gradle cache in your home dir
   # so we dont need to down load the internet each new docker instance
   dockerStart $1 -it \
-    -p 8080:8080 \
-	  -v `pwd`:/project:delegated  -w /project \
+    -w /project \
+    -p 8081:8080 \
+	  -v `pwd`:/project:delegated  \
 		-v ~/.gradle-docker/:/root/.gradle:delegated \
 		-d $2
 }
