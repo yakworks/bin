@@ -46,13 +46,18 @@ function init_from_build_yml {
     varsToEval+="builder_exec builder_name builder_url "
     # app
     varsToEval+="app_name app_key app_dir app_jar app_docker_url "
-    # kubernetes
+    # k8s
     varsToEval+="app_kub_nfs app_kub_namespace app_kub_ingress_url "
 
     for varName in $varsToEval; do
-      local upperVarName=$(echo "$varName" | awk '{print toupper($0)}')
+      local upperVarName=$(toupper "$varName")
       [ "${!varName}" ] && evalVar $upperVarName "${!varName}"
     done
+
+    # special handling, kubernetes requires all lower case for names so we abide and lower APP_KEY
+    [ "$APP_KEY" ] && APP_KEY=$(tolower "$APP_KEY")
+    [ "$APP_KUB_INGRESS_URL" ] && APP_KUB_INGRESS_URL=$(tolower "$APP_KUB_INGRESS_URL")
+
   fi
 }
 
@@ -71,10 +76,10 @@ function init_versions {
   # cuts to the last dot
   local baseVersion=$(echo $VERSION | cut -d. -f1-$dotCount)
 
-  # VERSIONX is used for docker and kubernetes as we deploy latests minor version
+  # VERSIONX is used for docker and k8s as we deploy latests minor version
   # also used to connect to the latest compatible database when that is relevant
   setVar VERSIONX "$baseVersion.x"
-  #replace dots with - so 10.0.x turns into v10-0-x. kubernetes can't have dots in names
+  #replace dots with - so 10.0.x turns into v10-0-x. k8s can't have dots in names
   setVar VERX_NO_DOTS "v${VERSIONX//./-}"
 
   setVar BUILD_VERSION "$VERSION"
@@ -149,6 +154,27 @@ function createEnvFile {
   done
   echo "BUILD_VARS=$BUILD_VARS" >> $1
   echo "created $1"
+}
+
+# parses the env file, eval and load into BUILD_VARS
+# $1 - the env file to parse
+function parse_env_file {
+
+  local lines=$(cat "$1")
+  local line key
+	while IFS= read -r line; do
+    # trim leading whitespace
+		line=${line#"${line%%[![:space:]]*}"}
+    # trim trailing whitespace
+		line=${line%"${line##*[![:space:]]}"}
+    # move on if its a comment
+		if [[ ! "$line" || "$line" == '#'* ]]; then continue ; fi
+    # echo "line $line"
+    key="${line%%=*}"
+    val="${line#*=}"
+    setVar $key "$val"
+	done <<<"$lines"
+  # log-vars
 }
 
 

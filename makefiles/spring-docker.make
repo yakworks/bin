@@ -34,8 +34,6 @@ build/docker/app.jar: $(APP_JAR) build/docker/Dockerfile | _verify_APP_JAR _veri
 	  	cd $(build_docker_dir); \
 	  	jar -xf app.jar; \
 
-# $(build.sh) docker_build_prep $(deploy_src_dir) $(APP_JAR) $(build_docker_dir)
-
 # does the docker build
 build/docker_built: build/docker/app.jar | _verify_APP_DOCKER_URL
 	docker build -t $(APP_DOCKER_URL) $(build_docker_dir)/.

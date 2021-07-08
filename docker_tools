@@ -1,6 +1,7 @@
 #!/bin/bash
 # ---
 # Common helper functions for running docker images and logging into dockerhub
+# ! DEPRECATED, using compose now, still used in docmark script
 # ---
 
 # ---

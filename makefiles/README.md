@@ -1,5 +1,9 @@
 This dir contains optional make files to include and help kickstart common targets depending on project language and structure
 
+great resource
+http://wanderinghorse.net/computing/make/book/ManagingProjectsWithGNUMake-3.1.3.pdf
+https://zhjwpku.com/assets/pdf/books/Managing.Projects.With.Gnu.Make.3Rd.Edition.pdf
+
 # Quick Cheat Sheet and Tips for Makefiles
 
 ## Formatting

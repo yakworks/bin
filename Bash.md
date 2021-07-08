@@ -364,3 +364,6 @@ if [ -z ${var+x} ]; then echo "var is unset"; else echo "var is set to '$var'"; 
 ## booleans
 
 bash has no Boolean data type, and so no keywords representing true and false. The if statement merely checks if the command you give it succeeds or fails. The test command takes an expression and succeeds if the expression is true; a non-empty string is an expression that evaluates as true, just as in most other programming languages. false is a command which always fails. (By analogy, true is a command that always succeeds.) 
+
+## SED
+https://edoras.sdsu.edu/doc/sed-oneliners.html

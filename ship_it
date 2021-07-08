@@ -9,29 +9,6 @@ __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" # get dir this script is i
 source "${__dir}/replace_version" # source it in
 source "${__dir}/git_tools" # source it in
 
-
-# ---
-# updates change log, bumps version, updates the publishingVersion in README
-# $1 - the current dev version
-# $2 - the previous published version
-# $3 - the changelog filename
-# $4 - the PROJECT_FULLNAME in the format of owner/repo, such as yakworks/gorm-tools
-# ---
-function release_prep {
-  echo "snapshot:false ... doing release process for version bump"
-  echo "---- update the changelog ----"
-  # git_tools
-  update_changelog $1 $2 $3 $4
-
-  echo "update version in README"
-  # versions
-  replace_version "$1" README.md
-
-  echo "---- increment the version.properties ----"
-  # versions
-  bumpVersionFile "$1"
-}
-
 # ---
 # tags and pushes changes to github
 # $1 - the current dev version we are releasing
@@ -116,7 +93,7 @@ function update_changelog {
 
 # bumps the current version and updates the version.properties
 # $1 - the current dev version that will be moved to publishedVersion, should be the version in the version.props
-function bumpVersionFile {
+function bump_version_props {
   local publishingVersion="${1}"
   local newVersion=$( bumpPatchLevel $publishingVersion)
   updateVersionFile $newVersion $publishingVersion

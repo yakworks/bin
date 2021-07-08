@@ -10,8 +10,9 @@ sinclude ./.env
 include $(BUILD_BIN)/make_core/env-db.make
 # calls the build.sh make_env_file to build the vairables file for make, recreates on each make run
 shResults := $(shell ./build.sh make_env_file $(BUILD_ENV) $(DB_VENDOR))
+makefile_env := ./build/make/makefile.env
 # import/sinclude the variables file to make it availiable to make as well
-sinclude ./build/make/makefile.env
+sinclude $(makefile_env)
 # includes for common
 include $(BUILD_BIN)/make_core/logging.make
 include $(BUILD_BIN)/make_core/ship-it.make
@@ -62,7 +63,7 @@ publish::
 release::
 	@:
 
-# Deploy the app. dockerize, kubernetes, etc... usually only CI
+# Deploy the app. dockerize, kubernetes, etc... usually only CI will run this
 deploy::
 	@:
 
@@ -89,7 +90,7 @@ log-vars: FORCE
 log-make_vars: FORCE
 	$(foreach v, $(.VARIABLES), $(info $(v) = $($(v))))
 
-# calls the build.sh log-vars to sanity check
+# for debugging, calls the build.sh log-vars to sanity check
 log-buildsh-vars: FORCE
 	$(build.sh) log-vars
 

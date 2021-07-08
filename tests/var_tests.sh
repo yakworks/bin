@@ -28,7 +28,6 @@ echo "-- When FOO is unset --"
 
 [[ "${FOO:-}" = "BOO" ]] && echo "** should not show"
 [[ "$FOO" = "" ]] && echo "** should not show"
-[[ "${FOO:-}" =  ]] && echo "** should not show"
 
 echo
 

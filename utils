@@ -47,6 +47,18 @@ function isTruthy {
   fi
 }
 
+# converts to lower case
+# $1 - what to convert
+function tolower {
+  echo "$1" | awk '{print tolower($0)}'
+}
+
+# converts to upper case
+# $1 - what to convert
+function toupper {
+  echo "$1" | awk '{print toupper($0)}'
+}
+
 # lists all the function/methods for the bash script
 function list-functions {
   shopt -s extdebug

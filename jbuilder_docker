@@ -1,6 +1,7 @@
 #!/bin/bash
 # ---
 # jdk builder docker and database docker
+# # ! DEPRECATED, kept as ref for now
 # ---
 
 # -----------------------------------
