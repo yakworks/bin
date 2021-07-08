@@ -11,10 +11,10 @@ kube-clean: | _verify_APP_KUB_NAMESPACE
 # double $$ on K8_USER and K8_TOKEN as they should be env variables
 ## creates kubectl config assumes $K8_SERVER $K8_USER $K8_TOKEN env vars are setup
 kube-config: | _verify_K8_SERVER
-	@kubectl config set-cluster ranch-dev --server=$(K8_SERVER); \
-	  kubectl config set-credentials $(K8_USER) --token=$(K8_TOKEN); \
-	  kubectl config set-context ranch-dev --user=$(K8_USER) --cluster=ranch-dev; \
-	  kubectl config use-context ranch-dev;
+	@kubectl config set-cluster ranch-dev --server="$(K8_SERVER)"; \
+	  kubectl config set-credentials "$(K8_USER)" --token="$(K8_TOKEN)"; \
+	  kubectl config set-context "ranch-dev" --user="$(K8_USER)" --cluster="ranch-dev"; \
+	  kubectl config use-context "ranch-dev";
 
 ## creates the KUB_NAMESPACE namespace if its doesn't exist
 kube-create-ns: | _verify_APP_KUB_NAMESPACE
