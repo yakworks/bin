@@ -1,6 +1,7 @@
 # -------------
 # kubernetes targets
 # -------------
+kube_tools := $(BUILD_BIN)/kube_tools
 
 .PHONY: kube-clean kube-config kube-create-ns kube-port-forward
 
@@ -18,7 +19,7 @@ kube-config: | _verify_K8_SERVER
 
 ## creates the KUB_NAMESPACE namespace if its doesn't exist
 kube-create-ns: | _verify_APP_KUB_NAMESPACE
-	@[ ! "`kubectl get ns | grep $(APP_KUB_NAMESPACE)`" ] && kubectl create namespace "$(APP_KUB_NAMESPACE)"
+	@$(kube_tools) kubeCreateNamespace $(APP_KUB_NAMESPACE)
 
 ## runs kubectl port-forward to the $(KUB_DB_SERVICE_NAME)
 kube-port-forward:
