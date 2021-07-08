@@ -14,7 +14,7 @@ git-push-pages: | _verify_PAGES_BRANCH _verify_PROJECT_FULLNAME
 	$(git_tools) git_push_pages $(PAGES_BRANCH) $(PAGES_BUILD_DIR) $(PROJECT_FULLNAME)
 
 update-changelog: | _verify_VERSION _verify_PUBLISHED_VERSION _verify_RELEASE_CHANGELOG _verify_PROJECT_FULLNAME
-	$(git_tools) update_changelog $(VERSION) $(PUBLISHED_VERSION) $(RELEASE_CHANGELOG) $(PROJECT_FULLNAME)
+	$(shipit) update_changelog $(VERSION) $(PUBLISHED_VERSION) $(RELEASE_CHANGELOG) $(PROJECT_FULLNAME)
 
 update-readme-version: | _verify_VERSION
 	$(shipit) replace_version "$(VERSION)" README.md
