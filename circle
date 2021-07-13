@@ -33,31 +33,6 @@ function trigger-circle {
     -u "${CIRCLE_TOKEN}:"
 }
 
-# does the logic for CI to publish the lib
-# $1 - the current branch we are on, on circle pass in $CIRCLE_BRANCH
-# !DEPRECATED here for history only
-function ci-publish-lib {
-  # uncomment these for testing
-  # CIRCLE_BRANCH=master
-  # CIRCLE_COMMIT_RANGE=911ff1ea1fa5...a883787c2f50
-
-  # Old stuff in case we want to resurect the change detection based on commit range
-  # CIRCLE_COMMIT_RANGE=$(circleCommitRange)
-  # HAS_APP_CHANGES=$(hasAppChanges "$CIRCLE_COMMIT_RANGE")
-  IS_RELEASABLE_BRANCH=$(is_releasable_branch "$1")
-
-  if [[ $IS_RELEASABLE_BRANCH ]]; then
-    echo "IS_RELEASABLE_BRANCH:true , snapshot: $snapshot .. calling ./gradlew publish"
-    ./gradlew publish
-    # if not snapshot then run through the release files of changelog, version bump and git push
-    if [ "$snapshot" == "false" ]; then
-      releaseFiles $1
-    fi
-  else
-    echo "IS_RELEASABLE_BRANCH:false ... not publishing"
-  fi
-}
-
 # ---
 # circle orb compare-url/reconstruct makes a CIRCLE_COMPARE_URL.txt and this will
 # returns the commit range like 911ff1ea1fa5...a883787c2f50

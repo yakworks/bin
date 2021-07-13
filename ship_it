@@ -99,13 +99,15 @@ function bump_version_props {
   updateVersionFile $newVersion $publishingVersion
 }
 
-# Updates version.properties with given version and sets publishedVersion to the $VERSION
+# Updates version.properties with given version, sets publishedVersion to the $VERSION
+# and sets snapshot to true
 # $1 - the new version
 # $2 - the published version
 function updateVersionFile {
   if [ -n "$1" ] ; then
     sed -i.x -e "s/^version=.*/version=$1/g" version.properties
     sed -i.x -e "s/^publishedVersion=.*/publishedVersion=$2/g" version.properties
+    sed -i.x -e "s/^snapshot=.*/snapshot=true/g" version.properties
     rm -f version.properties.x
   else
     echo "ERROR: missing version parameter " >&2
