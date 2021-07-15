@@ -6,8 +6,8 @@
 # ---
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" # get dir this script is in
 source "${__dir}/setVar"
-source "${__dir}/init_docker_builders"
 source "${__dir}/yaml"
+source "${__dir}/git_tools"
 source "${__dir}/utils"
 
 # version.properties should be in root dir
@@ -16,19 +16,43 @@ if [ -e "version.properties" ]; then source version.properties; fi
 # initializes the environment
 function init_env {
   [ "$version" ] && init_versions
+
+  init_defaults # call before init_from_build_yml
+
   # if gradle project then this imports vars from the build.yml
   init_from_build_yml
-  # standards
-  setVar PROJECT_NAME ${PROJECT_FULLNAME##*/}
+  
+  # defaults
+  init_defaults # call again after init_from_build_yml
 
-  # add pages defaults
-  init_pages_defaults
   # if this is running in circle then this will init variables for brnach and releaseing
   circle_init_env
-  # build and env vars
-  init_docker_builders
-  # this is where to put custom stuff in the build.sh
-  # post_init_env
+
+}
+
+# makes sure defaults are setup
+function init_defaults {
+  # important to remeber that setVar registers the var in BUILD_VARS
+  # but only sets the passed in value if the variable is unset or empty
+  [ ! $PROJECT_FULLNAME ] && project_fullname_from_git_remote
+  add_build_vars PROJECT_FULLNAME
+
+  # defaults the project name to the part after last /, so if fullname is 'foo/bar' then project name will be 'bar'
+  setVar PROJECT_NAME ${PROJECT_FULLNAME##*/}
+  setVar APP_NAME ${PROJECT_NAME}
+  # the dir where the app is, defaults to the root of the project
+  setVar APP_DIR "."
+  setVar APP_KEY ${APP_NAME}
+
+  setVar RELEASE_BRANCH_REGEX master
+
+  # the dir where the app is, defaults to the root of the project
+  setVar APP_DIR "."
+  setVar APP_KEY ${APP_NAME}
+  
+  # sets up defaults for PAGES if they are not setup already
+  setVar PAGES_BUILD_DIR "build/gh-pages"
+  setVar PAGES_BRANCH "gh-pages"
 }
 
 # sets up defaults vars for docker ninedb and dock builders
@@ -47,18 +71,17 @@ function init_from_build_yml {
     # app
     varsToEval+="app_name app_key app_dir app_jar app_docker_url "
     # k8s
-    varsToEval+="app_kub_nfs app_kub_namespace app_kub_ingress_url "
+    varsToEval+="app_kube_nfs app_kube_namespace app_kube_ingress_url "
 
-    for varName in $varsToEval; do
+    for varName in $varsToEval; do 
       local upperVarName=$(toupper "$varName")
       [ "${!varName}" ] && evalVar $upperVarName "${!varName}"
     done
-
     # special handling, kubernetes requires all lower case for names so we abide and lower APP_KEY
     [ "$APP_KEY" ] && APP_KEY=$(tolower "$APP_KEY")
-    [ "$APP_KUB_INGRESS_URL" ] && APP_KUB_INGRESS_URL=$(tolower "$APP_KUB_INGRESS_URL")
-
+    [ "$APP_KUBE_INGRESS_URL" ] && APP_KUBE_INGRESS_URL=$(tolower "$APP_KUBE_INGRESS_URL")
   fi
+  return 0 # I don't understand why this is needed
 }
 
 
@@ -92,12 +115,6 @@ function init_versions {
   fi
 
   return 0
-}
-
-# sets up defaults for PAGESif they are not setup already
-function init_pages_defaults {
-  setVar PAGES_BUILD_DIR "build/gh-pages"
-  setVar PAGES_BRANCH "gh-pages"
 }
 
 # sets up defaults vars for docker ninedb and dock builders

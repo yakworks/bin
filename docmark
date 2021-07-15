@@ -15,11 +15,12 @@ DOCMARK_DOCKER_NAME=docmark-server
 # Copies readme, updates version and replaces links that went into docs
 # $1 - the version to update
 function cp_readme_index {
-  rm -f docs/index.md
-  cp README.md docs/index.md
-  [[ "$1" ]] && replace_version "$1" docs/index.md
+  local index_md=docs/index.md
+  rm -f $index_md
+  cp README.md $index_md
+  [[ "$1" ]] && replace_version "$1" $index_md
   # replace the (docs/ text in links as they are in same dir now, ex [foo](docs/bar.md) will become [foo](bar.md)
-  sed -i -e "s~(\s*docs\/~(~g" docs/index.md
+  sed -i.bak -e "s~(\s*docs\/~(~g" $index_md && rm "${index_md}.bak"
   return 0
 }
 

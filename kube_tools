@@ -8,13 +8,21 @@ source "${__dir}/init_env"
 source "${__dir}/sed_tpl"
 
 # ---
+# runs sed on the kubernetes tpl.yml and puts in build dir
+# $1 - the template file to apply
+# ---
+function process_tpl {
+  # set the variables in BUILD_ENV so we can build the sed replacement for templates
+  parse_env_file "build/make/makefile.env"
+  sed_tpl $1 "build/kube"
+}
+
+# ---
 # runs sed on the kubernetes tpl.yml template files to update and replace variables with values
 # $1 - the template file to apply
 # ---
 function kubeApplyTpl {
-  # set the variables in BUILD_ENV so we can build the sed replacement for templates
-  parse_env_file "build/make/makefile.env"
-  local processedTplFile=$(sed_tpl $1 "build/kube")
+  local processedTplFile=$(process_tpl $1 "build/kube")
   # echo "processedTpl $processedTpl"
   kubectl apply -f $processedTplFile
 }

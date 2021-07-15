@@ -6,32 +6,35 @@ docmark.sh := $(BUILD_BIN)/docmark
 # --- Dockers ---
 ## docker for docmark docs, follow with a docker cmd  up, down, shell or pull
 docker-dockmark: | _verify-DOCKER_CMD
-	$(MAKE) docker-dockmark-$(DOCKER_CMD)
+	make docker-dockmark-$(DOCKER_CMD)
 
 # start the docs server locally to serve pages
-docker-dockmark-up: docmark-copy-readme
-	$(docmark.sh) docmark_run
+docker-dockmark-up:
+	@$(docmark.sh) docmark_run
 
-# start the docs server locally to serve pages
-docker-dockmark-down: docmark-copy-readme
-	$(docmark.sh) dockerRemove docmark-serve
+# takes down the docker
+docker-dockmark-down:
+	@$(docmark.sh) dockerRemove docmark-serve
 
 # use this to open shell and test targets for CI such as docmark-build
 docker-dockmark-shell:
-	$(docmark.sh) docmark_shell
+	@$(docmark.sh) docmark_shell
 
 # pulls the latest version
 docker-dockmark-pull:
-	$(docmark.sh) docmark_pull
+	@$(docmark.sh) docmark_pull
 
 # --- BUILDS ----
 
 # copy readme to main index
 docmark-copy-readme:
-	$(docmark.sh) cp_readme_index $(VERSION)
+	@$(docmark.sh) cp_readme_index $(VERSION)
+
+# empty target that gets called before the build that main makefile can implement to do any special processing
+docmark-build-prep:
 
 ## build the docs, run this inside docmark container such as in CI, make docker-dockmark-shell locally
-docmark-build: docmark-copy-readme
+docmark-build: docmark-build-prep
 	docmark build --site-dir build/site
 
 # clones pages branch, builds and copies into branch, doesn't push,

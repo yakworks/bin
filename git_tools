@@ -16,7 +16,7 @@ function init_github_vars {
   local ghFullName="${1:-$PROJECT_FULLNAME}"
   if [ ! "$ghFullName" ]; then
     echo "PROJECT_FULLNAME not set, trying `git config --get remote.origin.url`"
-    PROJECT_FULLNAME=$(git config --get remote.origin.url | cut -d/ -f4,5 | cut -d. -f1)
+    project_fullname_from_git_remote
     # if it didn't get it then error
     [ ! "$PROJECT_FULLNAME" ] && echo "PROJECT_FULLNAME did not get setup" && return 1
     ghFullName="$PROJECT_FULLNAME"
@@ -40,6 +40,18 @@ function init_github_vars {
   verify_git_user
 
   return 0
+}
+
+# set the PROJECT_FULLNAME github slug from git config --get remote.origin.url
+# based on whther its https or ssh git
+function project_fullname_from_git_remote {
+  local remoteUrl=$(git config --get remote.origin.url)
+  if  [[ $remoteUrl == git* ]];then
+    PROJECT_FULLNAME=$(echo "$remoteUrl"  | cut -d: -f2 | cut -d. -f1)
+  else
+    PROJECT_FULLNAME=$(echo "$remoteUrl" | cut -d/ -f4,5 | cut -d. -f1)
+  fi
+  # echo $PROJECT_FULLNAME
 }
 
 # checks is a git user is setup, and if not sets up the bot user, used in CI.
