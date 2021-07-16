@@ -1,7 +1,10 @@
 # The "main" utility functions and helpers useful for the common case. Most
 # our makefiles require this file, so it's sensible to `include` it first.
 # inspired by https://github.com/basejump/ludicrous-makefiles
-
+# make default shell bash
+SHELL := /bin/bash
+# Do not use the built-in rules specified in the  system makefile.
+MAKEFLAGS += -rR
 # the dir this is in
 BUILD_BIN := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 # include .env, sinclude ignores if its not there
@@ -19,58 +22,9 @@ include $(BUILD_BIN)/make_core/ship-it.make
 
 HELP_AWK := $(BUILD_BIN)/make_core/help.awk
 
-# -- standard names, all double :: so you can have many
-# NOTE: any targets implemneted in main Makefile or others must also have :: for these
-# See https://www.gnu.org/software/make/manual/make.html#Double_002dColon for more information.
-
-## removes build artifacts
-clean::
-	@:
-
-## runs lint and code style checks
-lint::
-	@:
-
-## compiles the app
-compile::
-	@:
-
-## Run the lint and tests
-check::
-	@:
-
-## runs all tests
-test::
-	@:
-
-## runs unit tests
-test-unit::
-	@:
-
-## runs integration/e2e tests
-test-e2e::
-	@:
-
-## builds the libs
-build::
-	@:
-
-## publish the libs
-publish::
-	@:
-
-# Full release, version bump, changelog update... usually only CI
-release::
-	@:
-
-# Deploy the app. dockerize, kubernetes, etc... usually only CI will run this
-deploy::
-	@:
-
 # Useful for forcing targets to build when .PHONY doesn't help, plus it looks a bit cleaner in many cases than .phony
 FORCE:
-
-.PHONY: clean lint compile check test test-unit test-e2e build publish release deploy FORCE
+.PHONY: FORCE
 
 # see Target-specific Variable Values for above https://www.gnu.org/software/make/manual/html_node/Target_002dspecific.html
 # done so main Makefile is seperate and comes last in awk so any help comments win for main file
