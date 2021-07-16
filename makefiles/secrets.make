@@ -13,7 +13,7 @@ vault-decrypt: import-gpg-key $(GIT_SECRET_SH) | _verify_VAULT_PROJECT _verify_G
 	[ ! -e build/vault ] && git clone $(VAULT_PROJECT) build/vault || :;
 	cd build/vault && $(GIT_SECRET_SH) reveal -p "$(GPG_PASS)"
 
-import-gpg-key: hasKey := $(shell gpg --list-keys | grep $(BOT_USER) )
+import-gpg-key: hasKey = $(shell gpg --list-keys | grep $(BOT_USER) )
 import-gpg-key: | _verify_GPG_PRIVATE_KEY
 	@if [[ ! "$(hasKey)" && "$(GPG_PRIVATE_KEY)" ]]; then \
 		echo "$(GPG_PRIVATE_KEY)" | base64 --decode | gpg -v --batch --import ; \
