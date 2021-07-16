@@ -185,6 +185,7 @@ function createEnvFile {
 function parse_bot_env_file {
   local bot_env="build/vault/bot.env"
   if [ -f $bot_env ]; then
+    #change this once we have it sqaured away so exported env vars always win
     parse_env_file $bot_env true
   fi
 }
