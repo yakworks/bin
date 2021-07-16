@@ -17,6 +17,15 @@ if [ -e "version.properties" ]; then source version.properties; fi
 function init_env {
   [ "$version" ] && init_versions
 
+  # if build/vault/bot.env has been cloned this will import the vars
+  parse_bot_env_file
+
+  # if developer has a local dotenv
+  parse_env_file ".env" true
+
+  # if this is running in circle then this will normailze ENV variables to ours
+  circle_init_env
+
   init_defaults # call before init_from_build_yml
 
   # if gradle project then this imports vars from the build.yml
@@ -25,11 +34,6 @@ function init_env {
   # defaults
   init_defaults # call again after init_from_build_yml
 
-  # if this is running in circle then this will init variables for brnach and releaseing
-  circle_init_env
-
-  # if build/vault/bot.env has been cloned this will import the vars
-  parse_bot_env_file
 }
 
 # makes sure defaults are setup
@@ -46,7 +50,10 @@ function init_defaults {
   setVar APP_DIR "."
   setVar APP_KEY ${APP_NAME}
 
+  # default the releasable branch pattern to just master
   setVar RELEASE_BRANCH_REGEX master
+
+  [ "$ACTIVE_BRANCH" ] && setVar RELEASABLE_BRANCH $(is_releasable_branch "$ACTIVE_BRANCH" "$RELEASE_BRANCH_REGEX")
 
   # the dir where the app is, defaults to the root of the project
   setVar APP_DIR "."
@@ -121,12 +128,14 @@ function init_versions {
   return 0
 }
 
-# sets up defaults vars for docker ninedb and dock builders
+# Checks for CIRCLECI and normalizes some ENV vars that are availiable
 function circle_init_env {
   # if CIRCLE_BRANCH is set then consider it setup
-  if [ "$CIRCLE_BRANCH" ]; then
-    add_build_vars CIRCLE_BRANCH
-    setVar RELEASABLE_BRANCH $(is_releasable_branch "$CIRCLE_BRANCH" "$RELEASE_BRANCH_REGEX")
+  if [ "$CIRCLECI" ]; then
+    setVar CI true
+    setVar ACTIVE_BRANCH "$CIRCLE_BRANCH"
+    setVar PROJECT_FULLNAME "${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+    # setVar GIT_REPO_URL "$CIRCLE_REPOSITORY_URL"
   fi
 }
 
@@ -190,10 +199,24 @@ function parse_bot_env_file {
   fi
 }
 
+# looks for .env file in root of project
+function parse_user_env_file {
+  local env_file=".env"
+  if [ -f $bot_env ]; then
+    #change this once we have it sqaured away so exported env vars always win
+    parse_env_file $bot_env true
+  fi
+}
+
+
 # parses the env file, eval and load into BUILD_VARS
 # $1 - the env file to parse
 # $2 - true if we want to override all variables that might already be set
 function parse_env_file {
+  # check if file exists, and return if not
+  if [ ! -f $1 ]; then
+    return 0
+  fi
 
   local lines=$(cat "$1")
   local line key
