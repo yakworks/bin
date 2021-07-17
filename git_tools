@@ -30,10 +30,10 @@ function init_github_vars {
   GITHUB_URL="https://$GITHUB_BASE_URL"
   # echo "GITHUB_URL $GITHUB_URL"
   # For CI the git user token will be set in env var.
-  if [[ $GRGIT_USER ]]; then
-    echo "adding GRGIT_USER token to GITHUB_URL: $GITHUB_URL"
+  if [[ $GITHUB_TOKEN ]]; then
+    echo "adding GITHUB_TOKEN token to GITHUB_URL: $GITHUB_URL"
     # add the token
-    GITHUB_URL="https://dummy:${GRGIT_USER}@$GITHUB_BASE_URL"
+    GITHUB_URL="https://dummy:${GITHUB_TOKEN}@$GITHUB_BASE_URL"
   fi
 
   #echo "GITHUB_URL $GITHUB_URL"

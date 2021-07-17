@@ -64,10 +64,10 @@ function docmark_shell {
     --entrypoint /bin/bash \
     -p 8000:8000 \
 	  -v `pwd`:/project:delegated  \
-    -e GRGIT_USER=${GRGIT_USER} \
+    -e GITHUB_TOKEN=${GITHUB_TOKEN} \
 		$DOCMARK_DOCKER_IMAGE
 
-  # GRGIT_USER gitub token is passed from local env to docmark so we can test publish
+  # GITHUB_TOKEN gitub token is passed from local env to docmark so we can test publish
 }
 
 # use this to open shell and test circle commands
