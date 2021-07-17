@@ -9,12 +9,12 @@ $(GIT_SECRET_SH):
 	@git clone https://github.com/sobolevn/git-secret.git $(GIT_SECRET_PATH) -b v0.4.0 --depth 1
 	@cd $(GIT_SECRET_PATH) && make build
 
-vault-decrypt: import-gpg-key $(GIT_SECRET_SH) | _verify_VAULT_PROJECT _verify_GPG_PASS
-	[ ! -e build/vault ] && git clone $(VAULT_PROJECT) build/vault || :;
+vault-decrypt: import-gpg-key $(GIT_SECRET_SH) | _verify_VAULT_URL _verify_GPG_PASS
+	[ ! -e build/vault ] && git clone $(VAULT_URL) build/vault || :;
 	cd build/vault && $(GIT_SECRET_SH) reveal -p "$(GPG_PASS)"
 
-import-gpg-key: hasKey = $(shell gpg --list-keys | grep $(BOT_USER) )
-import-gpg-key: | _verify_GPG_PRIVATE_KEY
+import-gpg-key: hasKey = $(shell gpg --list-keys | grep $(BOT_EMAIL) )
+import-gpg-key: | _verify_GPG_PRIVATE_KEY _verify_BOT_EMAIL
 	@if [[ ! "$(hasKey)" && "$(GPG_PRIVATE_KEY)" ]]; then \
 		echo "$(GPG_PRIVATE_KEY)" | base64 --decode | gpg -v --batch --import ; \
 	fi;
@@ -26,5 +26,5 @@ git-secret-version: $(GIT_SECRET_SH)
 secrets-encrypt:
 	@$(GIT_SECRET_SH) hide
 
-secrets-decrypt: 
+secrets-decrypt:
 	@$(GIT_SECRET_SH) reveal -p "$(GPG_PASS)"

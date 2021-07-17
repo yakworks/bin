@@ -1,6 +1,7 @@
 # -------------
 # Common targets for docs engine
 # -------------
+
 docmark.sh := $(BUILD_BIN)/docmark
 
 # --- Dockers ---

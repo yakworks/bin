@@ -3,6 +3,7 @@
 # for a project that is only for docs this should be all that is needed to include
 # -------------
 include $(BUILD_BIN)/makefiles/secrets.make
+include $(BUILD_BIN)/makefiles/git-tools.make
 include $(BUILD_BIN)/makefiles/kubectl-config.make
 include $(BUILD_BIN)/makefiles/circle.make
 include $(BUILD_BIN)/makefiles/docker.make

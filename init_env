@@ -73,6 +73,8 @@ function init_from_build_yml {
     create_yml_variables "./build.yml"
 
     local varsToEval="project_fullName project_subprojects "
+    # bot
+    varsToEval+="bot_user bot_email vault_url"
     # release
     varsToEval+="release_changelog release_branch_regex "
     # pages

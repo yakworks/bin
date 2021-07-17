@@ -60,11 +60,11 @@ function verify_git_user {
   local hasGitUser=$(git config --global user.email || true)
   # see https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash
   if [ ! "${hasGitUser}" ] || [ "$CI" ]; then
-    echo "adding GITHUB_BOT_USER"
-    : ${GITHUB_BOT_USER:=9cibot}
-    : ${GITHUB_BOT_EMAIL:=9cibot@9ci.com}
+    echo "adding BOT_USER"
+    : ${BOT_USER:=9cibot}
+    : ${BOT_EMAIL:=9cibot@9ci.com}
     # echo "adding git user"
-    config_bot_user $GITHUB_BOT_USER $GITHUB_BOT_EMAIL
+    config_bot_user $BOT_USER $BOT_EMAIL
   fi
 }
 
@@ -165,8 +165,8 @@ function git_debug {
   echo "PROJECT_FULLNAME: $PROJECT_FULLNAME"
   echo "GITHUB_BASE_URL: $GITHUB_BASE_URL"
   echo "GITHUB_URL: $GITHUB_URL"
-  echo "GITHUB_BOT_USER: $GITHUB_BOT_USER"
-  echo "GITHUB_BOT_EMAIL: $GITHUB_BOT_EMAIL"
+  echo "BOT_USER: $BOT_USER"
+  echo "BOT_EMAIL: $BOT_EMAIL"
 }
 
 # --- boiler plate function runner, keep at end of file ------

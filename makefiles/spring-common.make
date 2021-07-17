@@ -4,6 +4,7 @@
 # -------------
 # --- helper makefiles ---
 include $(BUILD_BIN)/makefiles/secrets.make
+include $(BUILD_BIN)/makefiles/git-tools.make
 include $(BUILD_BIN)/makefiles/docker.make
 include $(BUILD_BIN)/makefiles/kubectl-config.make
 include $(BUILD_BIN)/makefiles/kube.make

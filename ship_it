@@ -5,33 +5,25 @@
 set -e  # Abort script at first error, when a command exits with non-zero status
 
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" # get dir this script is in
-# shellcheck source=src/parse_url.sh
+source "${__dir}/init_env"
 source "${__dir}/replace_version" # source it in
-source "${__dir}/git_tools" # source it in
 
-# ---
-# tags and pushes changes to github
+# calls the github release endpoint to tag nd mark a release
 # $1 - the current dev version we are releasing
-# $2 - the changelog filename
-# $3 - the CI or release branch to push to, should be the active git branch that is checked out such as master
-# $4 - the PROJECT_FULLNAME in the format of owner/repo, such as yakworks/gorm-tools
-# ---
-function release_tag {
-  local versionTag="v$1"
-  local changelogName="$2"
-  local branch="$3"
-
-  echo "---- add ver, RM and changelog files ----"
-  # git_tools
-  [ "$GITHUB_URL" ] || init_github_vars "$4"
-  git add README.md version.properties "$changelogName"
-  git commit -m "$versionTag release, changelog, version [ci skip]"
-
-  echo "---- tag ----"
-  git tag -fa $versionTag -m "Release $versionTag [ci skip]"
-
-  echo "--- push ---"
-  git push -f $GITHUB_URL $versionTag "$branch"
+# $2 - the release branch to push to, should be the active releasable git branch that is checked out such as master
+# $3 - the PROJECT_FULLNAME in the format of owner/repo, such as yakworks/gorm-tools
+# $4 - the GITHUB_TOKEN auth token
+function create_release {
+  local api_data=$(printf '{
+    "tag_name": "v%s",
+    "name": "v%s",
+    "body": "Release of version %s",
+    "target_commitish": "%s",
+    "draft": false,
+    "prerelease": false}' $1 $1 $1 $2)
+  echo $api_data
+  local rurl="https://api.github.com/repos/$3/releases?access_token=$4"
+  curl -X POST --data "$api_data" "$rurl"
 }
 
 # updates the changelog, does a bunch of git diff work to get changes
@@ -41,7 +33,7 @@ function release_tag {
 # $4 - the PROJECT_FULLNAME in the format of owner/repo, such as yakworks/gorm-tools
 function update_changelog {
   # the GITHUB_LINK_URL such as https://github.com/yakworks/gorm-tools to make anchors in changelog
-  [ "$GITHUB_LINK_URL" ] || init_github_vars "$4"
+  [ "$GITHUB_LINK_URL" ] || GITHUB_LINK_URL="https://github.com/$4"
   # Repo URL to base links off of
   local LATEST_TAG="v$1" # example v6.1.12
   local PREVIOUS_TAG="v$2" # example v6.1.11
