@@ -33,7 +33,7 @@ docmark-copy-readme:
 # empty target that gets called before the build that main makefile can implement to do any special processing
 docmark-build-prep:
 
-## build the docs, run this inside docmark container such as in CI, make docker-dockmark-shell locally
+## run inside docmark container, builds the docs. 'make docker-dockmark-shell' will start shell
 docmark-build: docmark-build-prep
 	docmark build --site-dir build/site
 

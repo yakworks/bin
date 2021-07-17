@@ -7,7 +7,7 @@
 function init_docker_builders {
   # default docker builder
   setVar BUILDER_NAME "${PROJECT_NAME}-builder"
-  setVar BUILDER_URL "yakworks/alpine-jdk:builder8"
+  setVar BUILDER_URL "yakworks/builder:jdk8"
 
   # Defaults for builderes
   setVar USE_DOCKER_DB_BUILDER false

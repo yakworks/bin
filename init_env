@@ -30,7 +30,7 @@ function init_env {
 
   # if gradle project then this imports vars from the build.yml
   init_from_build_yml
-  
+
   # defaults
   init_defaults # call again after init_from_build_yml
 
@@ -58,7 +58,7 @@ function init_defaults {
   # the dir where the app is, defaults to the root of the project
   setVar APP_DIR "."
   setVar APP_KEY ${APP_NAME}
-  
+
   # sets up defaults for PAGES if they are not setup already
   setVar PAGES_BUILD_DIR "build/gh-pages"
   setVar PAGES_BRANCH "gh-pages"
@@ -84,12 +84,13 @@ function init_from_build_yml {
     # k8s
     varsToEval+="app_kube_nfs app_kube_namespace app_kube_ingress_url "
 
-    for varName in $varsToEval; do 
+    for varName in $varsToEval; do
       local upperVarName=$(toupper "$varName")
       [ "${!varName}" ] && evalVar $upperVarName "${!varName}"
     done
     # special handling, kubernetes requires all lower case for names so we abide and lower APP_KEY
     [ "$APP_KEY" ] && APP_KEY=$(tolower "$APP_KEY")
+    [ "$APP_DOCKER_URL" ] && APP_DOCKER_URL=$(tolower "$APP_DOCKER_URL")
     [ "$APP_KUBE_INGRESS_URL" ] && APP_KUBE_INGRESS_URL=$(tolower "$APP_KUBE_INGRESS_URL")
   fi
   return 0 # I don't understand why this is needed
@@ -120,6 +121,7 @@ function init_versions {
 
   # if its a snapshot then append the SNAPSHOT
   if [ $(isTruthy $snapshot) ]; then
+    setVar VERSION_POSTFIX "-SNAPSHOT"
     setVar IS_SNAPSHOT true
     BUILD_VERSION+="-SNAPSHOT"
     VERX_NO_DOTS+="-SNAPSHOT"
