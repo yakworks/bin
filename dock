@@ -87,6 +87,15 @@ function wait_for_mysql {
   done
 }
 
+function wait_for_postgres {
+  host=${1:-127.0.0.1}
+  echo "wait for psql ..."
+  export PGPASSWORD=$2
+  while ! psql -h $host -U postgres -c "SELECT 1" >/dev/null 2>&1; do
+    sleep 1
+  done
+}
+
 # -----
 # meant to be run inside the sql-server with docker exec
 # $1 - host
